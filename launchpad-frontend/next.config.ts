@@ -6,14 +6,11 @@ const nextConfig: NextConfig = {
   // Produces a self-contained server.js for Docker (no node_modules in image)
   output: "standalone",
 
-  // Type-checking and linting are enforced by dedicated CI jobs (frontend-check).
-  // Skipping them during `next build` keeps the Docker build lean and prevents
-  // false failures caused by missing NEXT_PUBLIC_* env vars at image build time.
+  // Type-checking is enforced by the CI lint job (tsc --noEmit).
+  // Skipping it here prevents false failures from missing NEXT_PUBLIC_* env
+  // vars at Docker image build time.
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
