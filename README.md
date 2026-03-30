@@ -14,7 +14,7 @@
 **A production-grade, full-stack resume builder built for modern professionals.**  
 AI-enhanced bullet points · Passwordless magic-link auth · Cloud sync · One-click PDF export
 
-[**Live Demo**](#) · [**Report a Bug**](https://github.com/47lucid/ResumeBuilder/issues) · [**Request Feature**](https://github.com/47lucid/ResumeBuilder/issues)
+[**Live Demo**](https://launchpad-frontend-latest.onrender.com/) · [**Report a Bug**](https://github.com/47lucid/ResumeBuilder/issues) · [**Request Feature**](https://github.com/47lucid/ResumeBuilder/issues)
 
 </div>
 
