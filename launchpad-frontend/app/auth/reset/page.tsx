@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getApiUrl } from "../../lib/api";
+
 
 function ResetPasswordUI() {
   const router = useRouter();
@@ -43,7 +45,8 @@ function ResetPasswordUI() {
     setMessage("");
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/api/auth/reset-password`, {
+      const res = await fetch(getApiUrl("/api/auth/reset-password"), {
+
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, token, new_password: password })

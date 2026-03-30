@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { ModernTemplate, MinimalTemplate, CreativeTemplate, TemplateSelector } from "../components/templates";
+import { getApiUrl } from "../lib/api";
+
 import LiquidArchiveButton from "../components/LiquidArchiveButton";
 
 interface Experience {
@@ -79,7 +81,8 @@ export default function Dashboard() {
     if (!token) return;
     const fetchResume = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/api/resume`, {
+        const res = await fetch(getApiUrl("/api/resume"), {
+
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {
@@ -121,7 +124,8 @@ export default function Dashboard() {
         }))
       };
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/api/ai/enhance`, {
+      const res = await fetch(getApiUrl("/api/ai/enhance"), {
+
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
@@ -192,7 +196,8 @@ export default function Dashboard() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/api/resume`, {
+      const res = await fetch(getApiUrl("/api/resume"), {
+
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
+import { getApiUrl } from "./lib/api";
+
 /* ─── Sub-components ─────────────────────────────────────────── */
 
 function Navbar() {
@@ -209,10 +211,9 @@ function LoginForm() {
     setMessage("");
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-      
       if (mode === "magic") {
-        const res = await fetch(`${apiUrl}/api/auth/magic-link`, {
+        const res = await fetch(getApiUrl("/api/auth/magic-link"), {
+
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -228,7 +229,8 @@ function LoginForm() {
           setMessage(d.message || "Failed to send link.");
         }
       } else if (mode === "forgot") {
-        const res = await fetch(`${apiUrl}/api/auth/forgot-password`, {
+        const res = await fetch(getApiUrl("/api/auth/forgot-password"), {
+
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -243,7 +245,8 @@ function LoginForm() {
         }
       } else {
         const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
-        const res = await fetch(`${apiUrl}${endpoint}`, {
+        const res = await fetch(getApiUrl(endpoint), {
+
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),

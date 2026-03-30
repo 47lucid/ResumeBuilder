@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import { getApiUrl } from "../../lib/api";
+
 
 function CallbackUI() {
   const router = useRouter();
@@ -22,7 +24,8 @@ function CallbackUI() {
     const verify = async () => {
       try {
         const [res] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}/api/auth/verify-link`, {
+          fetch(getApiUrl("/api/auth/verify-link"), {
+
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, token }),
