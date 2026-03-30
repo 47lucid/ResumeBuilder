@@ -1,88 +1,125 @@
 name: Benchmark — Backend Load Test
 
 on:
-  workflow_dispatch:       # Manual trigger
+  workflow_dispatch:       # Manual trigger from GitHub Actions UI
   push:
     branches: [main]
     paths:
-      - 'launchpad-backend/src/**'   # Only when backend code changes
+      - 'launchpad-backend/src/**'   # Only run when backend code changes
 
 jobs:
   benchmark:
     name: HTTP Load Test (wrk)
     runs-on: ubuntu-latest
 
-    services:
-      backend:
-        image: ghcr.io/${{ github.repository_owner }}/launchpad-backend:latest
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          PORT: 8080
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          JWT_SECRET: benchmark-test-secret
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        ports:
-          - 8080:8080
-        options: >-
-          --health-cmd "curl -f http://localhost:8080/health || exit 1"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
+    # Build and run the backend as a background process (from source).
+    # We do NOT use a Docker service container here because the image
+    # may not exist yet — building from source avoids the chicken-and-egg problem.
+
+    env:
+      # Benchmark-safe placeholder values (no real data needed for /health & /metrics)
+      PORT: 8080
+      JWT_SECRET: benchmark-ci-secret-not-for-production
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
 
+      # ── 1. Rust toolchain ─────────────────────────────────────────
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            launchpad-backend/target/
+          key: ${{ runner.os }}-cargo-bench-${{ hashFiles('launchpad-backend/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-bench-
+
+      # ── 2. Build release binary ───────────────────────────────────
+      - name: Build backend (release)
+        working-directory: launchpad-backend
+        run: cargo build --release
+
+      # ── 3. Start backend in background ────────────────────────────
+      - name: Start backend server
+        working-directory: launchpad-backend
+        run: |
+          ./target/release/launchpad-backend &
+          echo "BACKEND_PID=$!" >> "$GITHUB_ENV"
+
+      # ── 4. Wait for it to be healthy ──────────────────────────────
+      - name: Wait for backend to be healthy
+        run: |
+          echo "Waiting for backend on :8080..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/health; then
+              echo ""
+              echo "✅ Backend is up after ${i}s"
+              break
+            fi
+            echo "Attempt ${i}/30 — retrying in 1s..."
+            sleep 1
+          done
+          curl -sf http://localhost:8080/health || (echo "❌ Backend never became healthy" && exit 1)
+
+      # ── 5. Install wrk ────────────────────────────────────────────
       - name: Install wrk
         run: sudo apt-get install -y wrk
 
-      - name: Wait for backend to be healthy
-        run: |
-          echo "Waiting for backend..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:8080/health && echo "✅ Backend up!" && break
-            echo "Attempt $i — retrying in 2s..."
-            sleep 2
-          done
-
-      - name: Benchmark /health (baseline)
+      # ── 6. Run benchmarks ─────────────────────────────────────────
+      - name: Benchmark GET /health
         run: |
           echo "=== GET /health (12 threads, 100 connections, 30s) ==="
           wrk -t12 -c100 -d30s http://localhost:8080/health | tee benchmark-health.txt
 
-      - name: Benchmark /api/metrics
+      - name: Benchmark GET /api/metrics
         run: |
           echo "=== GET /api/metrics (4 threads, 20 connections, 15s) ==="
           wrk -t4 -c20 -d15s http://localhost:8080/api/metrics | tee benchmark-metrics.txt
 
-      - name: Benchmark /api/waitlist (POST)
+      - name: Benchmark POST /api/waitlist/subscribe
         run: |
-          echo "=== POST /api/waitlist (4 threads, 20 connections, 15s) ==="
+          echo "=== POST /api/waitlist/subscribe (4 threads, 20 connections, 15s) ==="
           cat > /tmp/post.lua << 'EOF'
           wrk.method = "POST"
-          wrk.body   = '{"email":"bench@test.com","source":"benchmark"}'
+          wrk.body   = '{"email":"bench@loadtest.invalid","source":"benchmark"}'
           wrk.headers["Content-Type"] = "application/json"
           EOF
-          wrk -t4 -c20 -d15s -s /tmp/post.lua http://localhost:8080/api/waitlist | tee benchmark-waitlist.txt
+          wrk -t4 -c20 -d15s -s /tmp/post.lua http://localhost:8080/api/waitlist/subscribe | tee benchmark-waitlist.txt
 
+      # ── 7. Summary ────────────────────────────────────────────────
       - name: Print summary
         run: |
-          echo "=============================="
-          echo "   BENCHMARK SUMMARY"
-          echo "=============================="
-          echo "--- /health ---"
-          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-health.txt
           echo ""
-          echo "--- /api/metrics ---"
-          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-metrics.txt
+          echo "══════════════════════════════════════"
+          echo "   BENCHMARK RESULTS SUMMARY"
+          echo "══════════════════════════════════════"
           echo ""
-          echo "--- POST /api/waitlist ---"
-          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-waitlist.txt
+          echo "── GET /health ──────────────────────"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-health.txt || true
+          echo ""
+          echo "── GET /api/metrics ─────────────────"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-metrics.txt || true
+          echo ""
+          echo "── POST /api/waitlist/subscribe ─────"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-waitlist.txt || true
+          echo ""
 
+      # ── 8. Stop backend ───────────────────────────────────────────
+      - name: Stop backend server
+        if: always()
+        run: kill "$BACKEND_PID" 2>/dev/null || true
+
+      # ── 9. Upload results ─────────────────────────────────────────
       - name: Upload benchmark results
         uses: actions/upload-artifact@v4
         with:

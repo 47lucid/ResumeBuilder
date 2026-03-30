@@ -154,11 +154,17 @@ jobs:
     needs: [docker-build-push]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
+    # Expose secrets as env vars — secrets context is not available
+    # inside step-level `if:` expressions, but `env` context is.
+    env:
+      RENDER_BACKEND_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
+      RENDER_FRONTEND_HOOK: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}
+
     steps:
       - name: Deploy backend to Render
-        if: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK != '' }}
-        run: curl -s "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+        if: env.RENDER_BACKEND_HOOK != ''
+        run: curl -fsS "$RENDER_BACKEND_HOOK"
 
       - name: Deploy frontend to Render
-        if: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK != '' }}
-        run: curl -s "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+        if: env.RENDER_FRONTEND_HOOK != ''
+        run: curl -fsS "$RENDER_FRONTEND_HOOK"
