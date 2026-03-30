@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, startTransition, ReactNode } from "react";
 
 interface AuthContextType {
   userEmail: string | null;
@@ -12,8 +12,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/** Parse a valid, non-expired JWT stored in localStorage — or return null. */
+/**
+ * Parse a valid, non-expired JWT from localStorage.
+ * Returns null on the server (SSR), on missing token, or on invalid/expired token.
+ * The typeof window guard prevents ReferenceError during Next.js build prerendering.
+ */
 function readStoredAuth(): { token: string; email: string } | null {
+  if (typeof window === "undefined") return null; // SSR guard — no localStorage on server
   try {
     const stored = localStorage.getItem("launchpad_token");
     if (!stored) return null;
@@ -29,9 +34,25 @@ function readStoredAuth(): { token: string; email: string } | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Lazy initializers run once on mount — no useEffect needed for hydration
-  const [token, setToken] = useState<string | null>(() => readStoredAuth()?.token ?? null);
-  const [userEmail, setUserEmail] = useState<string | null>(() => readStoredAuth()?.email ?? null);
+  // isLoading stays true until the client hydrates so protected routes don't
+  // flash before the stored token is read.
+  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Read localStorage only on the client after hydration.
+  // Using useEffect (runs only in the browser) avoids the SSR
+  // ReferenceError that the lazy initializer approach caused.
+  useEffect(() => {
+    const auth = readStoredAuth();
+    startTransition(() => {
+      if (auth) {
+        setToken(auth.token);
+        setUserEmail(auth.email);
+      }
+      setIsLoading(false);
+    });
+  }, []);
 
   const login = (newToken: string) => {
     try {
@@ -51,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ userEmail, token, login, logout, isLoading: false }}>
+    <AuthContext.Provider value={{ userEmail, token, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
