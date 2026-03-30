@@ -44,19 +44,26 @@ jobs:
           key: ${{ runner.os }}-cargo-bench-${{ hashFiles('launchpad-backend/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-bench-
 
-      # ── 2. Build release binary ───────────────────────────────────
+      # ── 2. Install system build deps ──────────────────────────────
+      # ring (rustls dep) and bcrypt both compile native C — need gcc.
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libssl-dev
+
+      # ── 3. Build release binary ───────────────────────────────────
       - name: Build backend (release)
         working-directory: launchpad-backend
         run: cargo build --release
 
-      # ── 3. Start backend in background ────────────────────────────
+      # ── 4. Start backend in background ────────────────────────────
       - name: Start backend server
         working-directory: launchpad-backend
         run: |
           ./target/release/launchpad-backend &
           echo "BACKEND_PID=$!" >> "$GITHUB_ENV"
 
-      # ── 4. Wait for it to be healthy ──────────────────────────────
+      # ── 5. Wait for it to be healthy ──────────────────────────────
       - name: Wait for backend to be healthy
         run: |
           echo "Waiting for backend on :8080..."
@@ -71,11 +78,11 @@ jobs:
           done
           curl -sf http://localhost:8080/health || (echo "❌ Backend never became healthy" && exit 1)
 
-      # ── 5. Install wrk ────────────────────────────────────────────
+      # ── 6. Install wrk ────────────────────────────────────────────
       - name: Install wrk
         run: sudo apt-get install -y wrk
 
-      # ── 6. Run benchmarks ─────────────────────────────────────────
+      # ── 7. Run benchmarks ─────────────────────────────────────────
       - name: Benchmark GET /health
         run: |
           echo "=== GET /health (12 threads, 100 connections, 30s) ==="
@@ -96,7 +103,7 @@ jobs:
           EOF
           wrk -t4 -c20 -d15s -s /tmp/post.lua http://localhost:8080/api/waitlist/subscribe | tee benchmark-waitlist.txt
 
-      # ── 7. Summary ────────────────────────────────────────────────
+      # ── 8. Summary ────────────────────────────────────────────────
       - name: Print summary
         run: |
           echo ""
@@ -114,12 +121,12 @@ jobs:
           grep -E "Requests/sec|Latency|Transfer/sec" benchmark-waitlist.txt || true
           echo ""
 
-      # ── 8. Stop backend ───────────────────────────────────────────
+      # ── 9. Stop backend ───────────────────────────────────────────
       - name: Stop backend server
         if: always()
         run: kill "$BACKEND_PID" 2>/dev/null || true
 
-      # ── 9. Upload results ─────────────────────────────────────────
+      # ── 10. Upload results ────────────────────────────────────────
       - name: Upload benchmark results
         uses: actions/upload-artifact@v4
         with:

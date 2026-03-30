@@ -1,11 +1,11 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 1: Build
+# Stage 1: Chef base — cargo-chef handles dep-caching correctly
 # ─────────────────────────────────────────────────────────────────────────────
-FROM rust:1.83-slim AS builder
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
 
-# build-essential is required by bcrypt (native C bindings via cc crate).
-# pkg-config + libssl-dev kept in case any future dep needs them.
-# ca-certificates ensures HTTPS works during the build (crate downloads).
+# ring (dep of rustls → reqwest) and bcrypt both compile native C.
+# build-essential provides gcc/g++/make. pkg-config + libssl-dev for any
+# crates that link against OpenSSL. ca-certificates for HTTPS during build.
 RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
@@ -15,60 +15,50 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# ── Dependency caching layer ──────────────────────────────────────────────────
-# Copy manifests only first. Then create a minimal stub for EVERY source file
-# so `cargo build --release` can compile ALL external crates without seeing
-# the real application code. This layer is cached unless Cargo.toml or
-# Cargo.lock change.
-COPY Cargo.toml Cargo.lock ./
-
-RUN mkdir src && \
-    # Dummy binary entry point (no mod declarations — avoids needing stubs)
-    echo 'fn main() { println!("stub"); }' > src/main.rs && \
-    # Stub every module so rustc can verify extern crate usage without code
-    for mod in ai auth db email metrics models resume waitlist; do \
-      echo "" > src/${mod}.rs; \
-    done
-
-# Build and cache all dependencies
-RUN cargo build --release
-
-# ── Application build layer ───────────────────────────────────────────────────
-# Remove ALL fingerprints and compiled artifacts for our own crate so cargo
-# does a clean rebuild of application code against the cached dep artifacts.
-RUN rm -rf \
-    target/release/.fingerprint/launchpad-backend-* \
-    target/release/deps/launchpad_backend-* \
-    target/release/launchpad-backend
-
-# Copy real source and compile the final binary
-COPY src ./src
-RUN touch src/*.rs && cargo build --release
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 2: Planner — analyses the dependency graph, outputs a recipe
+# ─────────────────────────────────────────────────────────────────────────────
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Stage 2: Runtime — minimal Debian, no Rust toolchain, no build tools
+# Stage 3: Builder — cook deps first (cached), then build the app
+# ─────────────────────────────────────────────────────────────────────────────
+FROM chef AS builder
+
+# Cook (compile) only the dependencies using the recipe.
+# This layer is cached as long as Cargo.toml / Cargo.lock haven't changed.
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# Now copy the real source and build only the application code.
+# Deps are already compiled in the layer above — this is fast.
+COPY . .
+RUN cargo build --release --bin launchpad-backend
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 4: Runtime — minimal Debian, no Rust toolchain, no build tools
 # ─────────────────────────────────────────────────────────────────────────────
 FROM debian:bookworm-slim AS runtime
 
 # ca-certificates for outbound HTTPS (Supabase, Groq, Resend).
-# curl for the Docker HEALTHCHECK.
-# No libssl3 needed — reqwest uses rustls (pure Rust TLS).
+# curl for the Docker/Render HEALTHCHECK.
+# No libssl needed — reqwest uses pure-Rust rustls.
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Run as non-root for security
+# Run as non-root
 RUN useradd -ms /bin/bash appuser
 USER appuser
 WORKDIR /home/appuser
 
-# Copy the statically-linked binary from builder
 COPY --from=builder /app/target/release/launchpad-backend ./launchpad-backend
 
 EXPOSE 8080
 
-# Health check — Render and Docker will use this to confirm the service is up
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD curl -f "http://localhost:${PORT:-8080}/health" || exit 1
 
