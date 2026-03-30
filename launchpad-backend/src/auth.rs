@@ -268,7 +268,12 @@ pub async fn reset_password(
     };
 
     // Update password
-    if state.db.update_password(&user.email, &hashed_pw).await.is_err() {
+    if state
+        .db
+        .update_password(&user.email, &hashed_pw)
+        .await
+        .is_err()
+    {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!(ApiError {
