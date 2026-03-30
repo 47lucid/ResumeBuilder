@@ -5,7 +5,7 @@ export default function CreativeTemplate({ data }: TemplateProps) {
   const { name, title, summary, experiences, skills } = data;
 
   return (
-    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "800px", background: "var(--surface)", display: "flex", minHeight: "1056px", color: "var(--on-surface)", fontFamily: "var(--font-space-grotesk), sans-serif", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px", overflow: "hidden" }}>
+    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "210mm", background: "var(--surface)", display: "flex", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "var(--font-space-grotesk), sans-serif", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "8px", overflow: "hidden" }}>
       
       {/* Sidebar Focus (left side) */}
       <div style={{ width: "32%", background: "var(--surface-container-high)", color: "var(--on-surface)", padding: "3rem 2rem", borderRight: "1px solid rgba(255,255,255,0.05)" }}>

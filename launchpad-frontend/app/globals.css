@@ -198,6 +198,38 @@ body {
 ::-webkit-scrollbar {
   width: 6px;
 }
+
+/* =============================================
+   PRINT STYLES
+   ============================================= */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  
+  html, body {
+    background-color: var(--background) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Ensure card itself doesn't show default browser borders or margins in print */
+  #print-area {
+    min-height: 297mm;
+    width: 210mm;
+    max-width: 210mm;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+}
+
 ::-webkit-scrollbar-track {
   background: var(--surface-container-low);
 }

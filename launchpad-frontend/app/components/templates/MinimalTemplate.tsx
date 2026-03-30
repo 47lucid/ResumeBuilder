@@ -5,7 +5,7 @@ export default function MinimalTemplate({ data }: TemplateProps) {
   const { name, title, summary, experiences, skills } = data;
 
   return (
-    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "800px", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.05)", padding: "4rem", borderRadius: "8px", minHeight: "1056px", color: "var(--on-surface)", fontFamily: "Georgia, serif" }}>
+    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "210mm", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.05)", padding: "4rem", borderRadius: "8px", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "Georgia, serif" }}>
       
       {/* Header */}
       <div style={{ borderBottom: "1px solid var(--on-surface)", paddingBottom: "1rem", marginBottom: "1.5rem", textAlign: "center" }}>

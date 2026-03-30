@@ -5,7 +5,7 @@ export default function ModernTemplate({ data }: TemplateProps) {
   const { name, title, summary, experiences, skills } = data;
 
   return (
-    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "800px", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.05)", padding: "3rem", borderRadius: "8px", minHeight: "1056px" }}>
+    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "210mm", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.05)", padding: "3rem", borderRadius: "8px", minHeight: "297mm" }}>
       
       {/* Header */}
       <div style={{ borderBottom: "2px solid var(--primary)", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
