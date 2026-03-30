@@ -164,7 +164,6 @@ impl SupabaseClient {
     }
 
     /// User Operations
-
     pub async fn get_user_by_email(&self, email: &str) -> Result<Option<crate::models::User>> {
         let url = format!("{}/rest/v1/users?email=eq.{}", self.base_url, email);
 
@@ -275,7 +274,6 @@ impl SupabaseClient {
     }
 
     /// Resume Operations
-
     pub async fn get_resume_by_email(
         &self,
         email: &str,

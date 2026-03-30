@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
+#[allow(dead_code)] // Deserialized from Supabase responses; not directly constructed in app code
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Subscriber {
     pub id: String,
@@ -76,7 +77,6 @@ pub struct LoginRequest {
     #[validate(email(message = "Invalid email address"))]
     pub email: String,
     pub password: Option<String>,
-    pub magic_token: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Validate)]

@@ -268,7 +268,7 @@ pub async fn reset_password(
     };
 
     // Update password
-    if let Err(_) = state.db.update_password(&user.email, &hashed_pw).await {
+    if state.db.update_password(&user.email, &hashed_pw).await.is_err() {
         return (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!(ApiError {
