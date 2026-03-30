@@ -1,0 +1,164 @@
+name: CI/CD — Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ${{ github.repository_owner }}/launchpad-backend
+  FRONTEND_IMAGE: ${{ github.repository_owner }}/launchpad-frontend
+
+jobs:
+  # ────────────────────────────────────────────────────────────────
+  # JOB 1: Lint & type-check backend (Rust)
+  # ────────────────────────────────────────────────────────────────
+  backend-check:
+    name: Rust — Lint & Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: launchpad-backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            launchpad-backend/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('launchpad-backend/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Clippy lint
+        run: cargo clippy -- -D warnings
+
+      - name: Cargo check
+        run: cargo check
+
+  # ────────────────────────────────────────────────────────────────
+  # JOB 2: Lint & type-check frontend (Next.js)
+  # ────────────────────────────────────────────────────────────────
+  frontend-check:
+    name: Next.js — Lint & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: launchpad-frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: launchpad-frontend/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+  # ────────────────────────────────────────────────────────────────
+  # JOB 3: Build & push Docker images (only on main push)
+  # ────────────────────────────────────────────────────────────────
+  docker-build-push:
+    name: Docker — Build & Push
+    runs-on: ubuntu-latest
+    needs: [backend-check, frontend-check]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract metadata (backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./launchpad-backend
+          file: ./launchpad-backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata (frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./launchpad-frontend
+          file: ./launchpad-frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ────────────────────────────────────────────────────────────────
+  # JOB 4: Trigger Render deploy hooks (only on main push)
+  # ────────────────────────────────────────────────────────────────
+  deploy-render:
+    name: Render — Trigger Deploy
+    runs-on: ubuntu-latest
+    needs: [docker-build-push]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy backend to Render
+        if: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK != '' }}
+        run: curl -s "${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}"
+
+      - name: Deploy frontend to Render
+        if: ${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK != '' }}
+        run: curl -s "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"

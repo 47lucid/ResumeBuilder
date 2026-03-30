@@ -1,0 +1,65 @@
+# Miscellaneous
+.DS_Store
+Thumbs.db
+*.swp
+
+# AI tool / internal files (not for public repo)
+AGENTS.md
+CLAUDE.md
+DESIGN.md
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Temporary files
+tmp/
+temp/
+obj/
+
+# Root-level Node (keep-alive deps)
+/node_modules/
+/package-lock.json
+
+# --- Project Specifics ---
+
+# Frontend (LaunchPad Frontend)
+launchpad-frontend/node_modules/
+launchpad-frontend/.next/
+launchpad-frontend/out/
+launchpad-frontend/build/
+launchpad-frontend/coverage/
+launchpad-frontend/.vercel
+launchpad-frontend/.env*
+launchpad-frontend/*.tsbuildinfo
+launchpad-frontend/next-env.d.ts
+launchpad-frontend/.pnp
+launchpad-frontend/.pnp.*
+launchpad-frontend/.yarn/*
+!launchpad-frontend/.yarn/patches
+!launchpad-frontend/.yarn/plugins
+!launchpad-frontend/.yarn/releases
+!launchpad-frontend/.yarn/versions
+
+# Backend (LaunchPad Backend)
+launchpad-backend/target/
+launchpad-backend/.env
+launchpad-backend/error.txt
+launchpad-backend/error_cmd.txt
+
+# Environment Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env*

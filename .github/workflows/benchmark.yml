@@ -1,0 +1,94 @@
+name: Benchmark — Backend Load Test
+
+on:
+  workflow_dispatch:       # Manual trigger
+  push:
+    branches: [main]
+    paths:
+      - 'launchpad-backend/src/**'   # Only when backend code changes
+
+jobs:
+  benchmark:
+    name: HTTP Load Test (wrk)
+    runs-on: ubuntu-latest
+
+    services:
+      backend:
+        image: ghcr.io/${{ github.repository_owner }}/launchpad-backend:latest
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          PORT: 8080
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JWT_SECRET: benchmark-test-secret
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+        ports:
+          - 8080:8080
+        options: >-
+          --health-cmd "curl -f http://localhost:8080/health || exit 1"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install wrk
+        run: sudo apt-get install -y wrk
+
+      - name: Wait for backend to be healthy
+        run: |
+          echo "Waiting for backend..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080/health && echo "✅ Backend up!" && break
+            echo "Attempt $i — retrying in 2s..."
+            sleep 2
+          done
+
+      - name: Benchmark /health (baseline)
+        run: |
+          echo "=== GET /health (12 threads, 100 connections, 30s) ==="
+          wrk -t12 -c100 -d30s http://localhost:8080/health | tee benchmark-health.txt
+
+      - name: Benchmark /api/metrics
+        run: |
+          echo "=== GET /api/metrics (4 threads, 20 connections, 15s) ==="
+          wrk -t4 -c20 -d15s http://localhost:8080/api/metrics | tee benchmark-metrics.txt
+
+      - name: Benchmark /api/waitlist (POST)
+        run: |
+          echo "=== POST /api/waitlist (4 threads, 20 connections, 15s) ==="
+          cat > /tmp/post.lua << 'EOF'
+          wrk.method = "POST"
+          wrk.body   = '{"email":"bench@test.com","source":"benchmark"}'
+          wrk.headers["Content-Type"] = "application/json"
+          EOF
+          wrk -t4 -c20 -d15s -s /tmp/post.lua http://localhost:8080/api/waitlist | tee benchmark-waitlist.txt
+
+      - name: Print summary
+        run: |
+          echo "=============================="
+          echo "   BENCHMARK SUMMARY"
+          echo "=============================="
+          echo "--- /health ---"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-health.txt
+          echo ""
+          echo "--- /api/metrics ---"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-metrics.txt
+          echo ""
+          echo "--- POST /api/waitlist ---"
+          grep -E "Requests/sec|Latency|Transfer/sec" benchmark-waitlist.txt
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: |
+            benchmark-health.txt
+            benchmark-metrics.txt
+            benchmark-waitlist.txt
+          retention-days: 30

@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+/* =============================================
+   NEON CATALYST DESIGN SYSTEM
+   LaunchPad — Dark Obsidian Theme
+   ============================================= */
+
+:root {
+  /* === PRIMARY (Neon Green) === */
+  --primary:                   #a1fd60;
+  --primary-container:         #5fb41b;
+  --primary-dim:               #93ee53;
+  --on-primary:                #2c5f00;
+  --on-primary-container:      #0f2900;
+  --inverse-primary:           #326c00;
+
+  /* === SECONDARY (Cyan) === */
+  --secondary:                 #00eefc;
+  --secondary-container:       #006970;
+  --secondary-dim:             #00deec;
+  --on-secondary:              #005359;
+  --on-secondary-container:    #e3fdff;
+
+  /* === TERTIARY (Neon Pink) === */
+  --tertiary:                  #ff6dcf;
+  --tertiary-container:        #fe4ccb;
+  --on-tertiary:               #4c003a;
+  --on-tertiary-container:     #330026;
+
+  /* === SURFACE STACK === */
+  --background:                #0e0e0f;
+  --surface:                   #0e0e0f;
+  --surface-dim:               #0e0e0f;
+  --surface-bright:            #2c2c2d;
+  --surface-container-lowest:  #000000;
+  --surface-container-low:     #131314;
+  --surface-container:         #19191b;
+  --surface-container-high:    #201f21;
+  --surface-container-highest: #262627;
+  --surface-variant:           #262627;
+  --surface-tint:              #a1fd60;
+  --on-surface:                #ffffff;
+  --on-surface-variant:        #adaaab;
+  --on-background:             #ffffff;
+  --inverse-surface:           #fcf8f9;
+  --inverse-on-surface:        #565556;
+
+  /* === ERROR === */
+  --error:                #ff7351;
+  --error-container:      #b92902;
+  --on-error:             #450900;
+  --on-error-container:   #ffd2c8;
+
+  /* === OUTLINE === */
+  --outline:              #767576;
+  --outline-variant:      #484849;
+
+  /* === TYPOGRAPHY === */
+  --font-display:   'Space Grotesk', sans-serif;
+  --font-body:      'Inter', sans-serif;
+
+  /* === SHAPE === */
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    16px;
+  --radius-full:  9999px;
+
+  /* === ELEVATION === */
+  --shadow-ambient: 0px 24px 48px -12px rgba(0, 0, 0, 0.5);
+
+  /* === GLASSMORPHISM === */
+  --glass-bg:   rgba(38, 38, 39, 0.6);
+  --glass-blur: blur(20px);
+
+  /* === GRADIENTS === */
+  --gradient-primary: linear-gradient(135deg, #a1fd60, #5fb41b);
+  --gradient-hero:    linear-gradient(160deg, rgba(161,253,96,0.08) 0%, transparent 50%);
+}
+
+/* =============================================
+   RESET & BASE
+   ============================================= */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =============================================
+   UTILITY CLASSES
+   ============================================= */
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(161, 253, 96, 0.08);
+}
+
+/* Primary CTA button */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--on-primary);
+  font-family: var(--font-body);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 0 8px rgba(95, 180, 27, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Secondary glass button */
+.btn-secondary {
+  background: rgba(38, 38, 39, 0.4);
+  border: 1px solid rgba(161, 253, 96, 0.2);
+  color: var(--primary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.btn-secondary:hover {
+  border-color: rgba(161, 253, 96, 0.4);
+  background: rgba(38, 38, 39, 0.7);
+}
+
+/* Chip / Progress pills */
+.chip {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Badge */
+.badge {
+  background: rgba(161, 253, 96, 0.12);
+  color: var(--primary);
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  letter-spacing: 0.04em;
+}
+
+/* Input neon focus */
+.input-neon {
+  background: var(--surface-container-lowest);
+  border: 1px solid rgba(72, 72, 73, 0.15);
+  border-radius: var(--radius-md);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  outline: none;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.input-neon:focus {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(0, 238, 252, 0.12), 0 1px 0 0 var(--secondary);
+}
+
+/* =============================================
+   SCROLLBAR
+   ============================================= */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-container-low);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-bright);
+  border-radius: 3px;
+}
+
+/* =============================================
+   ANIMATIONS
+   ============================================= */
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(161, 253, 96, 0.3); }
+  50%       { box-shadow: 0 0 0 12px rgba(161, 253, 96, 0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0.5deg); }
+  50%       { transform: translateY(-12px) rotate(-0.5deg); }
+}
+
+@keyframes counter-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 1px 0 0 rgba(0, 238, 252, 0.6); }
+  50%       { box-shadow: 0 1px 8px 0 rgba(0, 238, 252, 0.9); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -20px) scale(1.05); }
+  66%  { transform: translate(-20px, 15px) scale(0.97); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

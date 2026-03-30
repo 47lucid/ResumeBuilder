@@ -1,0 +1,78 @@
+.liquidButton {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  --x: 50;
+  --y: 50;
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.liquidButton:active {
+  transform: scale(0.95);
+}
+
+.liquidButton * {
+  pointer-events: none;
+}
+
+.gooLayer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: url('#goo') drop-shadow(0 6px 12px rgba(161, 253, 96, 0.25));
+  opacity: 0.95;
+  z-index: 1;
+}
+
+.gooBase {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 14, 15, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(161, 253, 96, 0.4);
+  border-radius: 50%;
+}
+
+.gooBlob {
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: 30px; 
+  height: 30px; 
+  background: rgba(161, 253, 96, 0.85); /* Neon green blob inside */
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  
+  /* SLOW, smooth return when cursor leaves (0.8 seconds) */
+  transition: left 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+              top 0.8s cubic-bezier(0.25, 1, 0.5, 1), 
+              width 0.3s ease, 
+              height 0.3s ease;
+}
+
+.liquidButton:hover .gooBlob {
+  width: 38px; 
+  height: 38px; 
+  
+  /* INSTANT tracking while hovering (0s on left and top) */
+  transition: left 0s, top 0s, width 0.3s ease, height 0.3s ease;
+}
+
+.icon {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.liquidButton:hover .icon {
+  transform: scale(1.1);
+}

@@ -1,0 +1,9 @@
+{
+  "name": "launchpad-root",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4"
+  }
+}
