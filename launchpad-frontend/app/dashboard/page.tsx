@@ -45,7 +45,12 @@ export default function Dashboard() {
   const [isEnhancing, setIsEnhancing] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
-  const [lastSyncedResume, setLastSyncedResume] = useState<{ name?: string; title?: string; templateId?: string; lastUpdate?: string } | null>(null);
+  
+  // Multi-resume states
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [allResumes, setAllResumes] = useState<Record<string, any>>({});
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saveName, setSaveName] = useState("");
 
   // Protected Route Check & Inactivity Timer
   useEffect(() => {
@@ -88,13 +93,27 @@ export default function Dashboard() {
         if (res.ok) {
           const data = await res.json();
           if (data) {
-            if (data.name) setName(data.name);
-            if (data.title) setTitle(data.title);
-            if (data.summary) setSummary(data.summary);
-            if (data.skills) setSkills(data.skills);
-            if (data.experiences) setExperiences(data.experiences);
-            if (data.templateId) setTemplateId(data.templateId);
-            setLastSyncedResume(data);
+            if (data.isMultiResume) {
+              setAllResumes(data.resumes || {});
+              const activeName = data.activeResume || Object.keys(data.resumes || {})[0];
+              if (activeName && data.resumes[activeName]) {
+                const active = data.resumes[activeName];
+                if (active.name) setName(active.name);
+                if (active.title) setTitle(active.title);
+                if (active.summary) setSummary(active.summary);
+                if (active.skills) setSkills(active.skills);
+                if (active.experiences) setExperiences(active.experiences);
+                if (active.templateId) setTemplateId(active.templateId);
+              }
+            } else {
+              if (data.name) setName(data.name);
+              if (data.title) setTitle(data.title);
+              if (data.summary) setSummary(data.summary);
+              if (data.skills) setSkills(data.skills);
+              if (data.experiences) setExperiences(data.experiences);
+              if (data.templateId) setTemplateId(data.templateId);
+              setAllResumes({ "Main Resume": data });
+            }
           }
         }
       } catch (_e) {
@@ -193,22 +212,51 @@ export default function Dashboard() {
     window.print();
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
+    setIsSaveModalOpen(true);
+  };
+
+  const confirmSaveToCloud = async () => {
+    if (!saveName.trim()) {
+      alert("Please enter a resume name.");
+      return;
+    }
+
+    if (allResumes[saveName]) {
+      if (!window.confirm(`A resume named "${saveName}" already exists. Do you want to overwrite it?`)) {
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
-      const res = await fetch(getApiUrl("/api/resume"), {
+      const currentResumeData = { name, title, summary, skills, experiences, templateId, lastUpdate: new Date().toLocaleTimeString() };
+      
+      const newAllResumes = {
+        ...allResumes,
+        [saveName]: currentResumeData
+      };
 
+      const payload = {
+        isMultiResume: true,
+        activeResume: saveName,
+        resumes: newAllResumes
+      };
+
+      const res = await fetch(getApiUrl("/api/resume"), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}` 
         },
         body: JSON.stringify({
-          resume_data: { name, title, summary, skills, experiences, templateId }
+          resume_data: payload
         })
       });
       if (res.ok) {
-        setLastSyncedResume({ name, title, templateId, lastUpdate: new Date().toLocaleTimeString() });
+        setAllResumes(newAllResumes);
+        setIsSaveModalOpen(false);
+        setSaveName("");
         alert("Resume securely synced to Supabase Cloud.");
       } else {
         alert("Failed to sync to cloud.");
@@ -219,8 +267,21 @@ export default function Dashboard() {
     setIsSaving(false);
   };
 
+  const loadResume = (resumeName: string) => {
+    const active = allResumes[resumeName];
+    if (active) {
+      if (active.name) setName(active.name);
+      if (active.title) setTitle(active.title);
+      if (active.summary) setSummary(active.summary);
+      if (active.skills) setSkills(active.skills);
+      if (active.experiences) setExperiences(active.experiences);
+      if (active.templateId) setTemplateId(active.templateId);
+      setIsArchiveOpen(false);
+    }
+  };
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--background)" }}>
+    <div className="flex-col lg:flex-row" style={{ display: "flex", minHeight: "100vh", background: "var(--background)" }}>
       
       {/* ─── PRINT ONLY CSS LOGIC ─── */}
       <style dangerouslySetInnerHTML={{__html: `
@@ -260,7 +321,7 @@ export default function Dashboard() {
       `}} />
 
       {/* ─── LEFT PANEL: EDITOR ─── */}
-      <div className="no-print" style={{ width: "450px", borderRight: "1px solid rgba(72,72,73,0.2)", height: "100vh", overflowY: "auto", background: "var(--surface-container-low)", padding: "2rem", zIndex: 10, position: "relative" }}>
+      <div className="no-print h-auto lg:h-screen" style={{ width: "100%", maxWidth: "450px", flexShrink: 0, borderRight: "1px solid rgba(72,72,73,0.2)", overflowY: "auto", background: "var(--surface-container-low)", padding: "clamp(1.5rem, 5vw, 2rem)", zIndex: 10, position: "relative" }}>
         
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3rem" }}>
           <div style={{ fontFamily: "var(--font-space-grotesk)", fontWeight: 700, fontSize: "1.2rem", color: "var(--primary)" }}>
@@ -297,17 +358,17 @@ export default function Dashboard() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {experiences.map((exp) => (
                 <div key={exp.id} style={{ background: "var(--surface-container)", padding: "1rem", borderRadius: "12px", border: "1px solid rgba(72,72,73,0.2)" }}>
-                  <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                    <input className="input-neon" value={exp.company} onChange={e => updateExp(exp.id, "company", e.target.value)} placeholder="Company" style={{ flex: 1, padding: "10px", fontSize: "0.875rem" }} />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "10px" }}>
+                    <input className="input-neon" value={exp.company} onChange={e => updateExp(exp.id, "company", e.target.value)} placeholder="Company" style={{ flex: "1 1 120px", padding: "10px", fontSize: "0.875rem" }} />
                     {experiences.length > 1 && (
                       <button onClick={() => removeExperience(exp.id)} title="Remove Experience" style={{ background: "transparent", border: "none", color: "var(--on-surface-variant)", cursor: "pointer", fontSize: "1.2rem", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px" }}>
                         &times;
                       </button>
                     )}
                   </div>
-                  <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                    <input className="input-neon" value={exp.role} onChange={e => updateExp(exp.id, "role", e.target.value)} placeholder="Role" style={{ flex: 1, padding: "10px", fontSize: "0.875rem" }} />
-                    <input className="input-neon" value={exp.duration} onChange={e => updateExp(exp.id, "duration", e.target.value)} placeholder="Duration" style={{ width: "120px", padding: "10px", fontSize: "0.875rem" }} />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "10px" }}>
+                    <input className="input-neon" value={exp.role} onChange={e => updateExp(exp.id, "role", e.target.value)} placeholder="Role" style={{ flex: "1 1 120px", padding: "10px", fontSize: "0.875rem" }} />
+                    <input className="input-neon" value={exp.duration} onChange={e => updateExp(exp.id, "duration", e.target.value)} placeholder="Duration" style={{ flex: "1 1 120px", maxWidth: "100%", padding: "10px", fontSize: "0.875rem" }} />
                   </div>
                   
                   <div style={{ marginBottom: "10px" }}>
@@ -348,10 +409,10 @@ export default function Dashboard() {
       </div>
 
       {/* ─── RIGHT PANEL: LIVE PREVIEW & ACTIONS ─── */}
-      <div style={{ flex: 1, height: "100vh", overflowY: "auto", position: "relative" }}>
+      <div className="h-auto lg:h-screen flex-1 min-w-0 overflow-auto relative">
         
         {/* Floating Action Bar */}
-        <div className="no-print" style={{ position: "sticky", top: "2rem", display: "flex", justifyContent: "flex-end", padding: "0 2rem", zIndex: 50, pointerEvents: "none" }}>
+        <div className="no-print flex justify-center lg:justify-end" style={{ position: "sticky", top: "2rem", padding: "0 1rem", zIndex: 50, pointerEvents: "none", marginBottom: "1rem" }}>
           <div style={{ background: "rgba(14,14,15,0.6)", backdropFilter: "blur(12px)", padding: "8px 12px", borderRadius: "100px", border: "1px solid rgba(161,253,96,0.2)", display: "flex", gap: "10px", pointerEvents: "auto", boxShadow: "0 10px 40px rgba(0,0,0,0.5)" }}>
             <button onClick={handleSave} className="btn-secondary" disabled={isSaving} style={{ padding: "8px 16px", borderRadius: "100px", fontSize: "0.875rem", border: "none" }}>
               {isSaving ? "Syncing..." : "☁️ Save to Cloud"}
@@ -363,14 +424,14 @@ export default function Dashboard() {
         </div>
 
         {/* The Live Resume Paper */}
-        <div style={{ padding: "4rem 2rem", display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: "clamp(4rem, 10vw, 6rem) clamp(1rem, 3vw, 2rem) clamp(10rem, 15vw, 15rem)", display: "flex", justifyContent: "center" }}>
           {templateId === "modern" && <ModernTemplate data={{ name, title, summary, skills, experiences }} />}
           {templateId === "minimal" && <MinimalTemplate data={{ name, title, summary, skills, experiences }} />}
           {templateId === "creative" && <CreativeTemplate data={{ name, title, summary, skills, experiences }} />}
         </div>
 
         {/* Floating Liquid Button */}
-        <div className="no-print" style={{ position: "fixed", bottom: "3rem", right: "3rem", zIndex: 100 }}>
+        <div className="no-print fixed bottom-6 right-6 md:bottom-12 md:right-12 z-[100]">
           <LiquidArchiveButton onClick={() => setIsArchiveOpen(true)} />
         </div>
 
@@ -397,13 +458,15 @@ export default function Dashboard() {
           {/* Modal Content container expanding from bottom right */}
           <div style={{
             position: "relative",
-            width: "50%",
-            height: "60vh",
+            width: "clamp(300px, 90%, 600px)",
+            maxHeight: "80vh",
+            height: "auto",
+            minHeight: "40vh",
             background: "rgba(30, 30, 32, 0.85)",
             backdropFilter: "blur(16px)",
             border: "1px solid rgba(161, 253, 96, 0.3)",
             borderRadius: "24px",
-            padding: "3rem",
+            padding: "clamp(1.5rem, 5vw, 3rem)",
             boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
             transform: isArchiveOpen ? "translateY(0)" : "translateY(50px)",
             opacity: isArchiveOpen ? 1 : 0,
@@ -420,41 +483,131 @@ export default function Dashboard() {
             </h2>
             <p style={{ color: "var(--on-surface-variant)" }}>Your securely synced cloud resumes across all devices.</p>
             
-            <div style={{ flex: 1, marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-              {lastSyncedResume ? (
-                <div style={{
-                  background: "var(--surface-container-low)",
-                  border: "1px solid rgba(161, 253, 96, 0.2)",
-                  borderRadius: "16px",
-                  padding: "1.5rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  cursor: "pointer",
-                  transition: "background 0.2s ease"
-                }}>
-                  <div>
-                    <h3 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "var(--on-surface)", marginBottom: "0.25rem" }}>
-                      Main Resume Profile
-                    </h3>
-                    <p style={{ color: "var(--on-surface-variant)", fontSize: "0.9rem", margin: 0 }}>
-                      {lastSyncedResume.name || "Unknown"} • {lastSyncedResume.title || "No Title"}
-                    </p>
+            <div style={{ flex: 1, marginTop: "2rem", display: "flex", flexDirection: "column", gap: "1rem", overflowY: "auto" }}>
+              {Object.keys(allResumes).length > 0 ? (
+                Object.entries(allResumes).map(([resName, resData]) => (
+                  <div key={resName} style={{
+                    background: "var(--surface-container-low)",
+                    border: "1px solid rgba(161, 253, 96, 0.2)",
+                    borderRadius: "16px",
+                    padding: "1.5rem",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    transition: "background 0.2s ease"
+                  }}>
+                    <div>
+                      <h3 style={{ fontSize: "1.2rem", fontWeight: "bold", color: "var(--on-surface)", marginBottom: "0.25rem" }}>
+                        {resName}
+                      </h3>
+                      <p style={{ color: "var(--on-surface-variant)", fontSize: "0.9rem", margin: 0 }}>
+                        {resData.name || "Unknown"} • {resData.title || "No Title"}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                      <span style={{ fontSize: "0.8rem", color: "var(--primary)", background: "rgba(161, 253, 96, 0.1)", padding: "4px 8px", borderRadius: "8px" }}>
+                        {resData.lastUpdate ? `Synced ${resData.lastUpdate}` : "Synced to Cloud"}
+                      </span>
+                      <button onClick={() => loadResume(resName)} className="btn-secondary" style={{ padding: "6px 12px", border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "var(--on-surface)" }}>
+                        Load
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <span style={{ fontSize: "0.8rem", color: "var(--primary)", background: "rgba(161, 253, 96, 0.1)", padding: "4px 8px", borderRadius: "8px" }}>
-                      {lastSyncedResume.lastUpdate ? `Synced ${lastSyncedResume.lastUpdate}` : "Synced to Cloud"}
-                    </span>
-                    <button onClick={() => setIsArchiveOpen(false)} className="btn-secondary" style={{ padding: "6px 12px", border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "var(--on-surface)" }}>
-                      Load
-                    </button>
-                  </div>
-                </div>
+                ))
               ) : (
-                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "12px" }}>
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", border: "1px dashed rgba(255,255,255,0.1)", borderRadius: "12px", minHeight: "100px" }}>
                   <span style={{ color: "var(--on-surface-variant)", fontStyle: "italic" }}>No Cloud Resumes Found. Save to Cloud to begin.</span>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── NEW: SAVE RESUME TO CLOUD MODAL ─── */}
+        <div className="no-print" style={{ 
+          position: "fixed", 
+          inset: 0, 
+          zIndex: 300, 
+          pointerEvents: isSaveModalOpen ? "auto" : "none",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          {/* Backdrop */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(14,14,15,0.8)",
+            backdropFilter: "blur(12px)",
+            opacity: isSaveModalOpen ? 1 : 0,
+            transition: "opacity 0.3s ease"
+          }} onClick={() => setIsSaveModalOpen(false)} />
+          
+          {/* Modal Content */}
+          <div style={{
+            position: "relative",
+            width: "clamp(300px, 90%, 450px)",
+            background: "var(--surface-container-low)",
+            backdropFilter: "blur(24px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "24px",
+            padding: "2rem",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
+            transform: isSaveModalOpen ? "scale(1) translateY(0)" : "scale(0.95) translateY(20px)",
+            opacity: isSaveModalOpen ? 1 : 0,
+            transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            willChange: "transform, opacity",
+            display: "flex",
+            flexDirection: "column"
+          }}>
+            <button onClick={() => setIsSaveModalOpen(false)} style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: "transparent", border: "none", color: "var(--on-surface-variant)", cursor: "pointer", fontSize: "1.5rem" }}>
+              &times;
+            </button>
+            
+            <h2 style={{ fontSize: "1.5rem", color: "var(--on-surface)", marginBottom: "0.5rem", fontWeight: "bold" }}>
+              Save to Cloud
+            </h2>
+            <p style={{ color: "var(--on-surface-variant)", fontSize: "0.9rem", marginBottom: "1.5rem", lineHeight: 1.5 }}>
+              Enter a name for this resume version. If the name already exists, it will ask to override.
+            </p>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <label style={{ fontSize: "0.85rem", color: "var(--on-surface)", marginBottom: "0.5rem", display: "block" }}>
+                  Resume Name
+                </label>
+                <input 
+                  type="text" 
+                  autoFocus
+                  className="input-neon" 
+                  value={saveName} 
+                  onChange={(e) => setSaveName(e.target.value)} 
+                  placeholder="e.g. Frontend Engineer, Management..." 
+                  style={{ width: "100%", padding: "12px", background: "var(--surface-container)", color: "var(--on-surface)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)" }} 
+                  onKeyDown={(e) => { if (e.key === "Enter") confirmSaveToCloud(); }}
+                />
+              </div>
+              
+              <button 
+                onClick={confirmSaveToCloud} 
+                disabled={isSaving || !saveName.trim()} 
+                style={{ 
+                  width: "100%", 
+                  padding: "12px", 
+                  background: "var(--on-surface)", 
+                  color: "var(--background)", 
+                  border: "none", 
+                  borderRadius: "12px", 
+                  fontWeight: "bold", 
+                  marginTop: "1rem",
+                  cursor: isSaving || !saveName.trim() ? "not-allowed" : "pointer",
+                  opacity: isSaving || !saveName.trim() ? 0.7 : 1,
+                  transition: "all 0.2s ease"
+                }}
+              >
+                {isSaving ? "Saving..." : "Save Resume"}
+              </button>
             </div>
           </div>
         </div>

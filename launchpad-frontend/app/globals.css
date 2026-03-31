@@ -187,17 +187,11 @@ body {
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .input-neon:focus {
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 3px rgba(0, 238, 252, 0.12), 0 1px 0 0 var(--secondary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(161, 253, 96, 0.12), 0 1px 0 0 var(--primary);
 }
 
 /* =============================================
-   SCROLLBAR
-   ============================================= */
-
-::-webkit-scrollbar {
-  width: 6px;
-}
 
 /* =============================================
    PRINT STYLES

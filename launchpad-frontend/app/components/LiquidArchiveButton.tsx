@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { IconFolder } from "@tabler/icons-react";
 import styles from "./LiquidArchiveButton.module.css";
 
 interface LiquidArchiveButtonProps {
@@ -35,13 +36,13 @@ export default function LiquidArchiveButton({ onClick }: LiquidArchiveButtonProp
     };
   }, []);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {    
     const rect = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--x", (((e.clientX - rect.x) / rect.width) * 100).toString());
     e.currentTarget.style.setProperty("--y", (((e.clientY - rect.y) / rect.height) * 100).toString());
   };
 
-  const handlePointerLeave = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerLeave = (e: React.PointerEvent<HTMLButtonElement>) => {   
     const target = e.currentTarget;
     setTimeout(() => {
       target.style.setProperty("--x", "50");
@@ -49,7 +50,7 @@ export default function LiquidArchiveButton({ onClick }: LiquidArchiveButtonProp
     }, 20);
   };
 
-  const handlePointerOver = (e: React.PointerEvent<HTMLButtonElement>) => {
+  const handlePointerOver = (e: React.PointerEvent<HTMLButtonElement>) => {    
     if (introRef.current) clearInterval(introRef.current);
     e.currentTarget.style.setProperty("--a", "");
   };
@@ -77,14 +78,10 @@ export default function LiquidArchiveButton({ onClick }: LiquidArchiveButtonProp
           <div className={styles.gooBase}></div>
           <div className={styles.gooBlob}></div>
         </div>
-
-        {/* Custom Document / Archive Icon */}
-        <svg className={styles.icon} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H14L21 10V19C21 20.1046 20.1046 21 19 21Z" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14 3V10H21" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <line x1="8" y1="14" x2="16" y2="14" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="2" strokeLinecap="round"/>
-          <line x1="8" y1="18" x2="16" y2="18" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
+        <div className={styles.glassOverlay}></div>
+        <div className={styles.icon}>
+          <IconFolder size={26} stroke={1.5} color="rgba(255,255,255,0.85)" />
+        </div>
       </button>
     </>
   );

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./context/AuthContext";
 import { getApiUrl } from "./lib/api";
+import { FloatingNav } from "./components/FloatingNav";
+import { IconHome, IconFileText, IconStar } from "@tabler/icons-react";
 
 /* ─── Sub-components ─────────────────────────────────────────── */
 
@@ -25,7 +28,7 @@ function Navbar() {
         left: 0,
         right: 0,
         zIndex: 100,
-        padding: "0 2rem",
+        padding: "0 clamp(1rem, 5vw, 2rem)",
         height: "64px",
         display: "flex",
         alignItems: "center",
@@ -53,12 +56,13 @@ function Navbar() {
         }}
       >
         <span style={{ fontSize: "1.1rem" }}>⬡</span>
-        LaunchPad Resume
+        <span className="hidden sm:inline">LaunchPad Resume</span>
+        <span className="sm:hidden">LaunchPad</span>
       </Link>
 
       {/* Nav links */}
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem" }}>
-        {["Templates", "Features"].map((item) => (
+      <div className="hidden sm:flex" style={{ alignItems: "center", gap: "2rem" }}>
+        {["Features", "Templates"].map((item) => (
           <Link
             key={item}
             href={`#${item.toLowerCase()}`}
@@ -98,10 +102,12 @@ function LiveResumeCard() {
       className="animate-float"
       style={{
         position: "relative",
-        width: "380px",
+        width: "100%",
+        maxWidth: "380px",
         flexShrink: 0,
         transformStyle: "preserve-3d",
         perspective: "1000px",
+        margin: "0 auto"
       }}
     >
       {/* Ambient glow behind card */}
@@ -119,7 +125,7 @@ function LiveResumeCard() {
       <div
         className="glass-card"
         style={{
-          padding: "2rem",
+          padding: "clamp(1.5rem, 5vw, 2rem)",
           position: "relative",
           overflow: "hidden",
           transform: "rotateY(-15deg) rotateX(5deg)",
@@ -201,6 +207,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [showFlower, setShowFlower] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
 
@@ -257,8 +264,9 @@ function LoginForm() {
           setStatus("success");
           setMessage(mode === "login" ? "Welcome back!" : "Account created!");
           login(d.token);
-          // Briefly wait for UI updates then redirect
-          setTimeout(() => router.push("/dashboard"), 800);
+          setShowFlower(true);
+          // Wait for flower animation
+          setTimeout(() => router.push("/dashboard"), 2800);
         } else {
           setStatus("error");
           setMessage(d.message || "Authentication failed.");
@@ -383,13 +391,96 @@ function LoginForm() {
           </p>
         )}
       </form>
-    </div>
-  );
-}
 
-const features = [
-  {
-    id: "ai-editing",
+      {showFlower && typeof document !== "undefined" && createPortal(
+        <>
+          {/* Flower Bloom Entrance Animation Overlay */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+              pointerEvents: "none",
+              background: "rgba(14,14,15,0.8)",
+              backdropFilter: "blur(12px)",
+              animation: "fadeIn 0.5s ease"
+            }}
+          >
+            <div className="flower-container">
+              {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                <div key={angle} className="petal" style={{ "--angle": `${angle}deg`, "--delay": `${(i % 4) * 0.15}s` } as React.CSSProperties} />
+              ))}
+              <div className="flower-center" />
+            </div>
+          </div>
+
+          <style dangerouslySetInnerHTML={{__html: `
+            .flower-container {
+              position: relative;
+              width: 0;
+              height: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .petal {
+              position: absolute;
+              bottom: 50%;
+              left: 50%;
+              width: 80px;
+              height: 220px;
+              margin-left: -40px;
+              background: linear-gradient(to top, rgba(161,253,96,0.9), rgba(0,238,252,0.6));
+              border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+              transform-origin: bottom center;
+              opacity: 0;
+              transform: rotate(var(--angle)) scaleY(0.1) rotateX(90deg);
+              animation: bloom 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+              animation-delay: var(--delay);
+              box-shadow: 0 0 30px rgba(0,238,252,0.3);
+              mix-blend-mode: screen;
+            }
+            .flower-center {
+              position: absolute;
+              width: 60px;
+              height: 60px;
+              background: #fff;
+              border-radius: 50%;
+              box-shadow: 0 0 50px #fff, 0 0 100px var(--primary);
+              opacity: 0;
+              transform: scale(0);
+              animation: center-glow 2.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            }
+            @keyframes bloom {
+              0% { opacity: 0; transform: rotate(var(--angle)) scaleY(0.1) rotateX(90deg); }
+              20% { opacity: 0.9; }
+              60% { opacity: 1; transform: rotate(var(--angle)) scaleY(1.2) rotateX(20deg); }
+              100% { opacity: 0; transform: rotate(var(--angle)) scaleY(1.6) rotateX(0deg) translateY(-20px); }
+            }
+            @keyframes center-glow {
+              0% { opacity: 0; transform: scale(0); }
+              40% { opacity: 1; transform: scale(1.2); }
+              100% { opacity: 0; transform: scale(3); }
+            }
+            @keyframes fadeIn {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
+          `}} />
+        </>,
+        document.body
+      )}
+
+      </div>
+    );
+  }
+
+  const features = [
+    {
+      id: "ai-editing",
     icon: "✦",
     title: "AI-Powered Editing",
     desc: "Craft the perfect bullet points with AI that understands industry keywords and impact metrics.",
@@ -543,14 +634,14 @@ function TemplateShowcase() {
       <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4rem" }}>
         
         {/* Left Side: Cards overlapping */}
-        <div style={{ flex: "1 1 400px", position: "relative", height: "400px" }}>
-          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "240px", height: "300px", transform: "rotate(-8deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "30%", width: "240px", height: "300px", transform: "rotate(4deg)", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "55%", width: "240px", height: "300px", transform: "rotate(12deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
+        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", position: "relative", height: "clamp(250px, 70vw, 400px)" }}>
+          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(-8deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "clamp(15%, 25vw, 30%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(4deg)", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "clamp(30%, 45vw, 55%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(12deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
         </div>
 
         {/* Right Side: Copy */}
-        <div style={{ flex: "1 1 400px" }}>
+        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", paddingBottom: "clamp(2rem, 15vh, 4rem)" }}>
           <h2
             style={{
               fontFamily: "var(--font-space-grotesk), sans-serif",
@@ -603,18 +694,10 @@ function HowItWorks() {
           </h2>
         </div>
 
-        {/* Horizontal flow */}
-        <div
-          style={{
-            display: "flex",
-            gap: "1.5rem",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
+        {/* Responsive Flow */}
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
           {steps.map((m, i) => (
-            <div key={m.label} style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+            <div key={m.label} className="flex flex-col md:flex-row items-center gap-6">
               <div
                 style={{
                   padding: "16px 24px",
@@ -633,14 +716,7 @@ function HowItWorks() {
                 <span>{m.label}</span>
               </div>
               {i < steps.length - 1 && (
-                <div
-                  style={{
-                    height: "2px",
-                    width: "40px",
-                    background: "var(--outline-variant)",
-                    opacity: 0.6,
-                  }}
-                />
+                <div className="bg-[var(--outline-variant)] opacity-60 w-[2px] h-[30px] md:w-[40px] md:h-[2px]" />
               )}
             </div>
           ))}
@@ -705,9 +781,28 @@ function Footer() {
 /* ─── Main Page ──────────────────────────────────────────────── */
 
 export default function LandingPage() {
+  const navItems = [
+    {
+      name: "Home",
+      link: "/",
+      icon: <IconHome className="h-4 w-4" />,
+    },
+    {
+      name: "Features",
+      link: "#features",
+      icon: <IconStar className="h-4 w-4" />,
+    },
+    {
+      name: "Templates",
+      link: "#templates",
+      icon: <IconFileText className="h-4 w-4" />,
+    },
+  ];
+
   return (
     <>
       <Navbar />
+      <FloatingNav navItems={navItems} />
 
       {/* ── HERO ──────────────────────────────────────────── */}
       <section

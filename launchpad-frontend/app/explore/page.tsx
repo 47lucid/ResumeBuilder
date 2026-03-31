@@ -45,16 +45,70 @@ export default function ExploreTemplates() {
       
       {/* ─── MODAL OVERLAY ─── */}
       {showLoginModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div className="glass-card" style={{ padding: "3rem", maxWidth: "400px", textAlign: "center", border: "1px solid var(--primary)", animation: "popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)" }}>
+        <div style={{ 
+          position: "fixed", 
+          inset: 0, 
+          zIndex: 9999, 
+          pointerEvents: showLoginModal ? "auto" : "none",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          {/* Backdrop */}
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(14,14,15,0.8)",
+            backdropFilter: "blur(12px)",
+            opacity: showLoginModal ? 1 : 0,
+            transition: "opacity 0.3s ease"
+          }} onClick={() => setShowLoginModal(false)} />
+          
+          {/* Modal Content */}
+          <div style={{
+            position: "relative",
+            width: "clamp(300px, 90%, 450px)",
+            background: "var(--surface-container-low)",
+            backdropFilter: "blur(24px)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "24px",
+            padding: "2.5rem 2rem",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
+            transform: showLoginModal ? "scale(1) translateY(0)" : "scale(0.95) translateY(20px)",
+            opacity: showLoginModal ? 1 : 0,
+            transition: "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            willChange: "transform, opacity",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}>
+            <button onClick={() => setShowLoginModal(false)} style={{ position: "absolute", top: "1.5rem", right: "1.5rem", background: "transparent", border: "none", color: "var(--on-surface-variant)", cursor: "pointer", fontSize: "1.5rem" }}>
+              &times;
+            </button>
             <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🔒</div>
-            <h2 style={{ fontFamily: "var(--font-space-grotesk)", fontSize: "1.5rem", marginBottom: "1rem" }}>Sign in to Customize</h2>
-            <p style={{ color: "var(--on-surface-variant)", marginBottom: "2rem", lineHeight: 1.5 }}>
+            <h2 style={{ fontSize: "1.5rem", color: "var(--on-surface)", marginBottom: "0.5rem", fontWeight: "bold", fontFamily: "var(--font-space-grotesk)" }}>
+              Sign in to Customize
+            </h2>
+            <p style={{ color: "var(--on-surface-variant)", fontSize: "0.95rem", marginBottom: "2rem", lineHeight: 1.5, textAlign: "center" }}>
               Create a free account to edit this template with your own data, use the AI enhancer, and export directly to PDF!
             </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-              <button className="btn-secondary" style={{ padding: "10px 24px" }} onClick={() => setShowLoginModal(false)}>Close</button>
-              <button className="btn-primary" style={{ padding: "10px 24px" }} onClick={() => router.push("/#login")}>Sign up free →</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
+              <button 
+                onClick={() => router.push("/#login")}
+                style={{ 
+                  width: "100%", 
+                  padding: "12px", 
+                  background: "var(--on-surface)", 
+                  color: "var(--background)", 
+                  border: "none", 
+                  borderRadius: "12px", 
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                Sign up free →
+              </button>
             </div>
           </div>
         </div>

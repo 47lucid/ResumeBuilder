@@ -55,6 +55,9 @@ RUN useradd -ms /bin/bash appuser
 USER appuser
 WORKDIR /home/appuser
 
+# Default ENV fallback (can be overridden at runtime)
+ENV RESEND_FROM_EMAIL="auth@aurain.me"
+
 COPY --from=builder /app/target/release/launchpad-backend ./launchpad-backend
 
 EXPOSE 8080

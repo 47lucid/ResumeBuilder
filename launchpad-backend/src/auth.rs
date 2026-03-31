@@ -109,38 +109,51 @@ async fn register(
         }
     };
 
-    if let Ok(Some(_)) = state.db.get_user_by_email(email).await {
-        return (
-            StatusCode::CONFLICT,
-            Json(json!(ApiError {
-                error: "ACCOUNT_EXISTS".to_string(),
-                message: "Account already exists.".to_string(),
-            })),
-        )
-            .into_response();
-    }
+    let mut account_ready = false;
 
-    match state.db.create_user(email, Some(&hashed)).await {
-        Ok(_) => {
-            let token = create_jwt(email);
-            (
-                StatusCode::OK,
-                Json(json!(AuthResponse {
-                    success: true,
-                    token: Some(token),
-                    message: "Registration successful".to_string(),
+    if let Ok(Some(existing_user)) = state.db.get_user_by_email(email).await {
+        if existing_user.password_hash.is_some() {
+            return (
+                StatusCode::CONFLICT,
+                Json(json!(ApiError {
+                    error: "ACCOUNT_EXISTS".to_string(),
+                    message: "Account already exists with a password.".to_string(),
                 })),
             )
-                .into_response()
+                .into_response();
+        } else {
+            // Already created via magic link but without a password. Update it.
+            if state.db.update_password(email, &hashed).await.is_ok() {
+                account_ready = true;
+            }
         }
-        Err(_) => (
+    } else {
+        // Did not exist. Create new.
+        if state.db.create_user(email, Some(&hashed)).await.is_ok() {
+            account_ready = true;
+        }
+    }
+
+    if account_ready {
+        let token = create_jwt(email);
+        (
+            StatusCode::OK,
+            Json(json!(AuthResponse {
+                success: true,
+                token: Some(token),
+                message: "Registration successful".to_string(),
+            })),
+        )
+            .into_response()
+    } else {
+        (
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!(ApiError {
                 error: "SERVER_ERROR".to_string(),
-                message: "Failed to create JWT.".to_string(),
+                message: "Failed to create or update account.".to_string(),
             })),
         )
-            .into_response(),
+            .into_response()
     }
 }
 
@@ -432,7 +445,7 @@ async fn send_magic_link(
     }
 
     let from_email = std::env::var("RESEND_FROM_EMAIL")
-        .unwrap_or_else(|_| "LaunchPad <onboarding@resend.dev>".to_string());
+        .unwrap_or_else(|_| "LaunchPad <auth@aurain.me>".to_string());
     let client = reqwest::Client::new();
     let magic_link_url = format!(
         "http://localhost:3000/auth/callback?token={}&email={}",
@@ -454,17 +467,16 @@ async fn send_magic_link(
         "html": html_content,
     });
 
-    if client
+    let res = client
         .post("https://api.resend.com/emails")
         .header("Authorization", format!("Bearer {}", resend_api_key))
         .header("Content-Type", "application/json")
         .json(&body)
         .send()
-        .await
-        .map(|r| r.status().is_success())
-        .unwrap_or(false)
-    {
-        (
+        .await;
+
+    match res {
+        Ok(r) if r.status().is_success() => (
             StatusCode::OK,
             Json(json!(MagicLinkResponse {
                 success: true,
@@ -472,16 +484,30 @@ async fn send_magic_link(
                     .to_string(),
             })),
         )
-            .into_response()
-    } else {
-        (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!(ApiError {
-                error: "EMAIL_SEND_FAILED".to_string(),
-                message: "Failed to send the email.".to_string(),
-            })),
-        )
-            .into_response()
+            .into_response(),
+        Ok(r) => {
+            let err_text = r.text().await.unwrap_or_default();
+            tracing::error!("Resend error: {}", err_text);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!(ApiError {
+                    error: "EMAIL_SEND_FAILED".to_string(),
+                    message: format!("Failed to send the email: {}", err_text),
+                })),
+            )
+                .into_response()
+        }
+        Err(e) => {
+            tracing::error!("Reqwest error: {}", e);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!(ApiError {
+                    error: "EMAIL_SEND_FAILED".to_string(),
+                    message: format!("Failed to send the email: {}", e),
+                })),
+            )
+                .into_response()
+        }
     }
 }
 
