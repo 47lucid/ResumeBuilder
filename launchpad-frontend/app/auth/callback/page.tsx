@@ -181,7 +181,7 @@ function CallbackUI() {
           fontSize: "1.125rem",
           marginBottom: "2.5rem"
         }}>
-          Welcome officially to the LaunchPad platform.
+          Welcome officially to the AuraIn. platform.
         </p>
         <button 
           onClick={() => router.push("/dashboard")}

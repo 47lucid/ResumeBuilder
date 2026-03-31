@@ -445,7 +445,7 @@ async fn send_magic_link(
     }
 
     let from_email = std::env::var("RESEND_FROM_EMAIL")
-        .unwrap_or_else(|_| "LaunchPad <auth@aurain.me>".to_string());
+        .unwrap_or_else(|_| "AuraIn. <auth@aurain.me>".to_string());
     let client = reqwest::Client::new();
     let magic_link_url = format!(
         "http://localhost:3000/auth/callback?token={}&email={}",
@@ -454,16 +454,16 @@ async fn send_magic_link(
     );
 
     let html_content = format!(
-        "<h2>Login to LaunchPad Resume Builder</h2>\
+        "<h2>Login to AuraIn.</h2>\
         <p>Click the link below to securely login to your account. This link will expire in 60 seconds.</p>\
-        <a href=\"{}\" style=\"padding: 12px 24px; background: #a1fd60; color: #000; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;\">Login to LaunchPad</a>",
+        <a href=\"{}\" style=\"padding: 12px 24px; background: #a1fd60; color: #000; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;\">Login to AuraIn.</a>",
         magic_link_url
     );
 
     let body = serde_json::json!({
         "from": from_email,
         "to": [email],
-        "subject": "Your Magic Login Link - LaunchPad Resume Builder",
+        "subject": "Your Magic Login Link - AuraIn.",
         "html": html_content,
     });
 

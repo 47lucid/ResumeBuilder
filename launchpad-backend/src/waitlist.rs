@@ -118,14 +118,14 @@ async fn get_count() -> impl IntoResponse {
 async fn send_welcome_email(to_email: &str) -> anyhow::Result<()> {
     let resend_api_key = std::env::var("RESEND_API_KEY")?;
     let from_email = std::env::var("RESEND_FROM_EMAIL")
-        .unwrap_or_else(|_| "LaunchPad <noreply@yourdomain.com>".to_string());
+        .unwrap_or_else(|_| "AuraIn. <hello@aurain.me>".to_string());
 
     let client = reqwest::Client::new();
 
     let body = serde_json::json!({
         "from": from_email,
         "to": [to_email],
-        "subject": "🚀 You're on the LaunchPad waitlist!",
+        "subject": "🚀 You're on the AuraIn. waitlist!",
         "html": r#"
             <!DOCTYPE html>
             <html>
@@ -143,16 +143,16 @@ async fn send_welcome_email(to_email: &str) -> anyhow::Result<()> {
             </head>
             <body>
               <div class="container">
-                <div class="logo">LaunchPad</div>
+                <div class="logo">AuraIn.</div>
                 <h1 class="headline">You're officially on the list. 🎉</h1>
                 <p class="body">
-                  Thank you for joining the LaunchPad waitlist. You're now part of an exclusive group of founders building in public.<br><br>
-                  We'll send you early access, behind-the-scenes updates, and launch day news directly to this inbox.
+                  Thank you for joining the AuraIn. waitlist. We will notify you when our professional resume builder is ready.<br><br>
+                  We'll send you early access, and launch day news directly to this inbox.
                 </p>
-                <a href="https://launchpad.app/waitlist" class="cta">View Your Spot →</a>
+                <a href="https://aurain.me" class="cta">Visit AuraIn. →</a>
                 <div class="footer">
-                  You received this because you signed up at launchpad.app<br>
-                  <a href="https://launchpad.app/unsubscribe" style="color: #767576;">Unsubscribe</a>
+                  You received this because you signed up at aurain.me<br>
+                  <a href="https://aurain.me/unsubscribe" style="color: #767576;">Unsubscribe</a>
                 </div>
               </div>
             </body>

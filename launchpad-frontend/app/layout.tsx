@@ -17,14 +17,14 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LaunchPad — Launch Your Product. Build in Public.",
+  title: "AuraIn. — Create Your Professional Resume",
   description:
-    "The premium SaaS launch platform for founders and indie hackers. Collect waitlist subscribers, send launch announcements, and track your product journey.",
-  keywords: ["product launch", "saas", "waitlist", "indie hacker", "startup"],
+    "AuraIn. is a resume builder to help you create professional resumes quickly.",
+  keywords: ["resume builder", "professional resume", "cv maker"],
   openGraph: {
-    title: "LaunchPad — Launch Your Product. Build in Public.",
+    title: "AuraIn. — Create Your Professional Resume",
     description:
-      "The premium SaaS launch platform for founders and indie hackers.",
+      "AuraIn. is a resume builder to help you create professional resumes quickly.",
     type: "website",
   },
 };

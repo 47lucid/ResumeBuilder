@@ -88,7 +88,7 @@ async fn broadcast(Json(payload): Json<BroadcastRequest>) -> impl IntoResponse {
     }
 
     let from_email = std::env::var("RESEND_FROM_EMAIL")
-        .unwrap_or_else(|_| "LaunchPad <hello@aurain.me>".to_string());
+        .unwrap_or_else(|_| "AuraIn. <hello@aurain.me>".to_string());
 
     let client = reqwest::Client::new();
     let mut sent_count = 0usize;

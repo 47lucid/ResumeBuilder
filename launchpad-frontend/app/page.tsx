@@ -56,8 +56,8 @@ function Navbar() {
         }}
       >
         <span style={{ fontSize: "1.1rem" }}>⬡</span>
-        <span className="hidden sm:inline">LaunchPad Resume</span>
-        <span className="sm:hidden">LaunchPad</span>
+        <span className="hidden sm:inline">AuraIn.</span>
+        <span className="sm:hidden">AuraIn.</span>
       </Link>
 
       {/* Nav links */}
@@ -757,10 +757,10 @@ function Footer() {
             textDecoration: "none",
           }}
         >
-          ⬡ LaunchPad Resume
+          ⬡ AuraIn.
         </Link>
         <p style={{ color: "var(--on-surface-variant)", fontSize: "0.8rem" }}>
-          © {new Date().getFullYear()} LaunchPad Group.
+          © {new Date().getFullYear()} AuraIn. Group.
         </p>
         <div style={{ display: "flex", gap: "1.25rem" }}>
           {["Privacy", "Terms"].map((link) => (
