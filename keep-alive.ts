@@ -37,32 +37,32 @@ if (isNaN(INTERVAL_MINS) || INTERVAL_MINS <= 0) {
   exit(1);
 }
 
-function ping(url: string): void {
+async function ping(url: string): Promise<void> {
   const timestamp = new Date().toLocaleTimeString();
-  const lib: typeof https | typeof http = url.startsWith('https') ? https : http;
-
-  const req = lib.get(url, (res: http.IncomingMessage) => {
-    const status: number = res.statusCode ?? 0;
+  
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    
     // Consume response body to free up the socket
-    res.resume();
+    await response.text();
 
+    const status: number = response.status;
     if (status >= 200 && status < 300) {
       console.log(`[${timestamp}] ✅ ${url} → ${status} OK`);
     } else {
       console.warn(`[${timestamp}] ⚠️  ${url} → ${status} (unexpected)`);
     }
-  });
-
-  req.on('error', (err: Error) => {
-    console.error(`[${timestamp}] ❌ ${url} → Error: ${err.message}`);
-  });
-
-  req.setTimeout(10_000);
-  req.on('timeout', () => {
-    req.destroy(new Error('Request timed out after 10s'));
-  });
-
-  req.end();
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      console.error(`[${timestamp}] ❌ ${url} → Error: Request timed out after 10s`);
+    } else {
+      console.error(`[${timestamp}] ❌ ${url} → Error: ${err.message}`);
+    }
+  }
 }
 
 function pingAll(): void {
