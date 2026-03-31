@@ -179,9 +179,15 @@ pub async fn forgot_password(
         .await
     {
         Ok(_) => {
-            let frontend_url = std::env::var("FRONTEND_URL")
-                .unwrap_or_else(|_| "https://aurain.me".to_string());
-            tracing::info!("🔗 [MOCK EMAIL] Password Reset link for {}: {}/auth/reset?email={}&token={}", user.email, frontend_url, user.email, token);
+            let frontend_url =
+                std::env::var("FRONTEND_URL").unwrap_or_else(|_| "https://aurain.me".to_string());
+            tracing::info!(
+                "🔗 [MOCK EMAIL] Password Reset link for {}: {}/auth/reset?email={}&token={}",
+                user.email,
+                frontend_url,
+                user.email,
+                token
+            );
             (
                 StatusCode::OK,
                 Json(
@@ -448,10 +454,10 @@ async fn send_magic_link(
 
     let from_email = std::env::var("RESEND_FROM_EMAIL")
         .unwrap_or_else(|_| "AuraIn. <auth@aurain.me>".to_string());
-    
-    let frontend_url = std::env::var("FRONTEND_URL")
-        .unwrap_or_else(|_| "https://aurain.me".to_string());
-        
+
+    let frontend_url =
+        std::env::var("FRONTEND_URL").unwrap_or_else(|_| "https://aurain.me".to_string());
+
     let client = reqwest::Client::new();
     let magic_link_url = format!(
         "{}/auth/callback?token={}&email={}",
