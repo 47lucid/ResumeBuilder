@@ -34,6 +34,8 @@ async fn main() -> anyhow::Result<()> {
     // CORS
     let cors = CorsLayer::new()
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS, Method::PATCH])
+        // You can restrict allow_origin to your domain for production:
+        // .allow_origin(["https://aurain.me".parse().unwrap(), "https://www.aurain.me".parse().unwrap()])
         .allow_origin(Any)
         .allow_headers(Any);
 

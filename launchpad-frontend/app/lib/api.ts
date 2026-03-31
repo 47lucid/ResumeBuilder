@@ -8,7 +8,7 @@
 export const API_BASE_URL = 
   process.env.NEXT_PUBLIC_API_URL || 
   (process.env.NODE_ENV === "production" 
-    ? "https://launchpad-backend-latest.onrender.com" 
+    ? "https://api.aurain.me" // Replace with your actual backend URL if different
     : "http://localhost:8080");
 
 /**

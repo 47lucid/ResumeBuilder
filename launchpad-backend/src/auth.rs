@@ -179,7 +179,9 @@ pub async fn forgot_password(
         .await
     {
         Ok(_) => {
-            tracing::info!("🔗 [MOCK EMAIL] Password Reset link for {}: http://localhost:3000/auth/reset?email={}&token={}", user.email, user.email, token);
+            let frontend_url = std::env::var("FRONTEND_URL")
+                .unwrap_or_else(|_| "https://aurain.me".to_string());
+            tracing::info!("🔗 [MOCK EMAIL] Password Reset link for {}: {}/auth/reset?email={}&token={}", user.email, frontend_url, user.email, token);
             (
                 StatusCode::OK,
                 Json(
@@ -446,17 +448,37 @@ async fn send_magic_link(
 
     let from_email = std::env::var("RESEND_FROM_EMAIL")
         .unwrap_or_else(|_| "AuraIn. <auth@aurain.me>".to_string());
+    
+    let frontend_url = std::env::var("FRONTEND_URL")
+        .unwrap_or_else(|_| "https://aurain.me".to_string());
+        
     let client = reqwest::Client::new();
     let magic_link_url = format!(
-        "http://localhost:3000/auth/callback?token={}&email={}",
+        "{}/auth/callback?token={}&email={}",
+        frontend_url,
         token,
         urlencoding::encode(email)
     );
 
     let html_content = format!(
-        "<h2>Login to AuraIn.</h2>\
-        <p>Click the link below to securely login to your account. This link will expire in 60 seconds.</p>\
-        <a href=\"{}\" style=\"padding: 12px 24px; background: #a1fd60; color: #000; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;\">Login to AuraIn.</a>",
+        "<div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6;\">\
+            <div style=\"padding-bottom: 20px;\">\
+                <p style=\"margin-top: 0;\">Hello,</p>\
+                <p>Here is your magic link to securely sign in to AuraIn.</p>\
+                <p>Simply click the button below to authenticate your session. For your security, this link will expire in 60 seconds.</p>\
+                <div style=\"text-align: center; margin: 40px 0;\">\
+                    <a href=\"{}\" style=\"background-color: #a1fd60; color: #000; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px; display: inline-block; border: 3px solid #000;\">Login to AuraIn</a>\
+                </div>\
+                <p>If you didn't request this email, you can safely ignore it.</p>\
+            </div>\
+            <div style=\"border-top: 1px solid #eaeaea; padding-top: 30px; text-align: center;\">\
+                <h2 style=\"margin: 0; color: #000; font-size: 28px; font-weight: 900; letter-spacing: -1px;\">AuraIn.</h2>\
+                <div style=\"margin-top: 15px; color: #888; font-size: 12px;\">\
+                    <p style=\"margin: 0;\">AuraIn, Inc.</p>\
+                    <p style=\"margin: 5px 0 0 0;\"><a href=\"https://aurain.me\" style=\"color: #888; text-decoration: underline;\">Visit our website</a></p>\
+                </div>\
+            </div>\
+        </div>",
         magic_link_url
     );
 
