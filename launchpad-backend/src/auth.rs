@@ -3,6 +3,7 @@ use crate::models::{
     ApiError, AuthResponse, ForgotPasswordRequest, LoginRequest, RegisterRequest,
     ResetPasswordRequest,
 };
+use axum::http::HeaderMap;
 use axum::{
     extract::{Json, State},
     http::StatusCode,
@@ -12,7 +13,7 @@ use axum::{
 };
 use bcrypt::{hash, verify, DEFAULT_COST};
 use chrono::{Duration, Utc};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::sync::Arc;
@@ -24,9 +25,31 @@ pub struct AppState {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
-    exp: usize,
+pub(crate) struct Claims {
+    pub sub: String,
+    pub exp: usize,
+}
+
+pub(crate) fn extract_email_from_token(headers: &HeaderMap) -> Result<String, ()> {
+    let _auth_header = headers.get("Authorization").ok_or(())?;
+    let auth_str = _auth_header.to_str().map_err(|_| ())?;
+    if !auth_str.starts_with("Bearer ") {
+        return Err(());
+    }
+
+    let token = &auth_str[7..];
+    let secret = std::env::var("JWT_SECRET").unwrap_or_else(|_| "super_secret_dev_key".to_string());
+
+    let token_data = match decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(secret.as_ref()),
+        &Validation::default(),
+    ) {
+        Ok(c) => c,
+        Err(_) => return Err(()),
+    };
+
+    Ok(token_data.claims.sub)
 }
 
 #[derive(Deserialize)]

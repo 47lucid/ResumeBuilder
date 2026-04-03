@@ -1,5 +1,12 @@
+use crate::auth::extract_email_from_token;
 use crate::models::ApiError;
-use axum::{extract::Json, http::StatusCode, response::IntoResponse, routing::post, Router};
+use axum::{
+    extract::Json,
+    http::{HeaderMap, StatusCode},
+    response::IntoResponse,
+    routing::post,
+    Router,
+};
 use serde::Serialize;
 use serde_json::json;
 
@@ -14,7 +21,26 @@ pub fn router() -> Router {
 
 /// POST /ai/enhance
 /// Rewrites resume sections using Groq Cloud API (Llama 3)
-async fn enhance_text(Json(payload): Json<serde_json::Value>) -> impl IntoResponse {
+async fn enhance_text(
+    headers: HeaderMap,
+    Json(payload): Json<serde_json::Value>,
+) -> impl IntoResponse {
+    // SECURITY: Validate JWT token
+    let _email = match extract_email_from_token(&headers) {
+        Ok(e) => e,
+        Err(_) => {
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(json!(ApiError {
+                    error: "UNAUTHORIZED".to_string(),
+                    message: "Invalid or missing token. You must be signed in to use AI features."
+                        .to_string(),
+                })),
+            )
+                .into_response()
+        }
+    };
+
     let groq_api_key = match std::env::var("GROQ_API_KEY") {
         Ok(k) => k,
         Err(_) => {
@@ -41,6 +67,7 @@ CRITICAL: You MUST output ONLY valid JSON matching this exact structure containi
   \"experiences\": [
     {
        \"id\": \"Keep original ID or generate a new unique string if you invent a new one\",
+       \"sectionTitle\": \"Maintain the original section object's title, e.g. Professional Experience, Education, Projects\",
        \"company\": \"Company name...\",
        \"role\": \"Job Title...\",
        \"duration\": \"YYYY - YYYY...\",

@@ -111,7 +111,7 @@ export const FloatingNav = ({ navItems }: { navItems: Array<{ name: string; link
             </Link>
           ))}
         </div>
-        <Link
+        <a
           href="#login"
           style={{
             fontSize: "0.875rem",
@@ -126,7 +126,7 @@ export const FloatingNav = ({ navItems }: { navItems: Array<{ name: string; link
           }}
         >
           <span>Login</span>
-        </Link>
+        </a>
       </div>
     </div>
   );

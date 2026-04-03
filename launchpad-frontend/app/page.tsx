@@ -84,22 +84,59 @@ function Navbar() {
             {item}
           </Link>
         ))}
-        <Link
+        <a
           href="#login"
           className="btn-primary"
           style={{ padding: "10px 20px", fontSize: "0.875rem", textDecoration: "none" }}
         >
           Login / Start Building
-        </Link>
+        </a>
       </div>
     </nav>
   );
 }
 
 function LiveResumeCard() {
+  const [rotation, setRotation] = useState({ x: 5, y: -15 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -10 + 5; 
+    const rotateY = ((x - centerX) / centerX) * 15 - 15; 
+
+    setRotation({ x: rotateX, y: rotateY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    const rotateX = ((y - centerY) / centerY) * -10 + 5; 
+    const rotateY = ((x - centerX) / centerX) * 15 - 15; 
+
+    setRotation({ x: rotateX, y: rotateY });
+  };
+
+  const handleLeave = () => {
+    setRotation({ x: 5, y: -15 });
+  };
+
   return (
     <div
       className="animate-float"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleLeave}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleLeave}
       style={{
         position: "relative",
         width: "100%",
@@ -107,7 +144,9 @@ function LiveResumeCard() {
         flexShrink: 0,
         transformStyle: "preserve-3d",
         perspective: "1000px",
-        margin: "0 auto"
+        margin: "0 auto",
+        WebkitTapHighlightColor: "transparent",
+        willChange: "transform"
       }}
     >
       {/* Ambient glow behind card */}
@@ -128,7 +167,8 @@ function LiveResumeCard() {
           padding: "clamp(1.5rem, 5vw, 2rem)",
           position: "relative",
           overflow: "hidden",
-          transform: "rotateY(-15deg) rotateX(5deg)",
+          transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+          transition: "transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
           boxShadow: "var(--shadow-ambient)",
         }}
       >
@@ -160,7 +200,7 @@ function LiveResumeCard() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Alex Developer
+              Aarav Sharma
             </div>
             <div style={{ color: "var(--primary)", fontSize: "0.875rem", fontWeight: 500 }}>
               Senior Next.js Engineer
@@ -329,7 +369,7 @@ function LoginForm() {
         </button>
       </div>
 
-      <form id="login" onSubmit={handleSubmit} style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+      <form onSubmit={handleSubmit} style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
         <input
           type="email"
           value={email}
@@ -521,6 +561,103 @@ function LoginForm() {
   }
 ];
 
+function FeatureCard({ f }: { f: { id: string; icon: string; title: string; desc: string; accent: string; glow: string } }) {
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        flex: "1 1 300px",
+        maxWidth: "400px",
+        position: "relative",
+        background: "var(--surface-container)",
+        border: "1px solid rgba(72,72,73,0.12)",
+        borderRadius: "var(--radius-lg)",
+        padding: "2rem",
+        overflow: "hidden",
+        transition: "transform 0.25s ease, box-shadow 0.25s ease",
+        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+        boxShadow: isHovered ? "var(--shadow-ambient)" : "none",
+        cursor: "default",
+      }}
+    >
+      {/* Interactive Hover Spotlight */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: isHovered
+            ? `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, ${f.glow.replace("0.06", "0.15")}, transparent 40%)`
+            : "transparent",
+          transition: "background 0.3s ease",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      {/* Base Gradient */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `radial-gradient(circle at top left, ${f.glow}, transparent 50%)`,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+      
+      {/* Content */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div
+          style={{
+            fontSize: "2rem",
+            marginBottom: "1.25rem",
+            width: "52px",
+            height: "52px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "var(--surface-container-high)",
+            borderRadius: "var(--radius-md)",
+            color: f.accent,
+            transition: "transform 0.3s ease",
+            transform: isHovered ? "scale(1.1) rotate(5deg)" : "scale(1) rotate(0deg)",
+          }}
+        >
+          {f.icon}
+        </div>
+        <h3
+          style={{
+            fontFamily: "var(--font-space-grotesk), sans-serif",
+            fontSize: "1.125rem",
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            color: "var(--on-surface)",
+            marginBottom: "0.75rem",
+          }}
+        >
+          {f.title}
+        </h3>
+        <p style={{ color: "var(--on-surface-variant)", fontSize: "0.9375rem", lineHeight: 1.7 }}>
+          {f.desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function FeaturesSection() {
   return (
     <section
@@ -568,59 +705,7 @@ function FeaturesSection() {
           }}
         >
           {features.map((f) => (
-            <div
-              key={f.id}
-              style={{
-                flex: "1 1 300px",
-                maxWidth: "400px",
-                background: `radial-gradient(circle at top left, ${f.glow}, var(--surface-container) 60%)`,
-                border: "1px solid rgba(72,72,73,0.12)",
-                borderRadius: "var(--radius-lg)",
-                padding: "2rem",
-                transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                cursor: "default",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "var(--shadow-ambient)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLElement).style.boxShadow = "none";
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "2rem",
-                  marginBottom: "1.25rem",
-                  width: "52px",
-                  height: "52px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "var(--surface-container-high)",
-                  borderRadius: "var(--radius-md)",
-                  color: f.accent
-                }}
-              >
-                {f.icon}
-              </div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-space-grotesk), sans-serif",
-                  fontSize: "1.125rem",
-                  fontWeight: 600,
-                  letterSpacing: "-0.02em",
-                  color: "var(--on-surface)",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                {f.title}
-              </h3>
-              <p style={{ color: "var(--on-surface-variant)", fontSize: "0.9375rem", lineHeight: 1.7 }}>
-                {f.desc}
-              </p>
-            </div>
+            <FeatureCard key={f.id} f={f} />
           ))}
         </div>
       </div>
@@ -629,15 +714,38 @@ function FeaturesSection() {
 }
 
 function TemplateShowcase() {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setOffset({ x, y });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = (touch.clientX - rect.left) / rect.width - 0.5;
+    const y = (touch.clientY - rect.top) / rect.height - 0.5;
+    setOffset({ x, y });
+  };
+
   return (
     <section id="templates" style={{ padding: "6rem 2rem", background: "var(--background)", overflow: "hidden" }}>
-      <div style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4rem" }}>
+      <div 
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setOffset({ x: 0, y: 0 })}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={() => setOffset({ x: 0, y: 0 })}
+        style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4rem", perspective: "1000px", WebkitTapHighlightColor: "transparent" }}
+      >
         
         {/* Left Side: Cards overlapping */}
-        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", position: "relative", height: "clamp(250px, 70vw, 400px)" }}>
-          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(-8deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "clamp(15%, 25vw, 30%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(4deg)", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "clamp(30%, 45vw, 55%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: "rotate(12deg)", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
+        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", position: "relative", height: "clamp(250px, 70vw, 400px)", transformStyle: "preserve-3d" }}>
+          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(-8deg) translate3d(${offset.x * 20}px, ${offset.y * 20}px, -20px)`, transition: "transform 0.15s ease-out", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "clamp(15%, 25vw, 30%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(4deg) translate3d(${offset.x * -25}px, ${offset.y * -25}px, 0px)`, transition: "transform 0.15s ease-out", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "clamp(30%, 45vw, 55%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(12deg) translate3d(${offset.x * 40}px, ${offset.y * 40}px, 30px)`, transition: "transform 0.15s ease-out", zIndex: 3, boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }} />
         </div>
 
         {/* Right Side: Copy */}
@@ -806,6 +914,7 @@ export default function LandingPage() {
 
       {/* ── HERO ──────────────────────────────────────────── */}
       <section
+        id="login"
         style={{
           minHeight: "100vh",
           display: "flex",

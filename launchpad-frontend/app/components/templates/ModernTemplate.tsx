@@ -2,17 +2,22 @@ import React from "react";
 import { TemplateProps } from "./types";
 
 export default function ModernTemplate({ data }: TemplateProps) {
-  const { name, title, summary, experiences, skills } = data;
+  const { name, title, summary, experiences, skills, accentColor, resumeBg } = data;
+  const accent = accentColor || "var(--primary)";
+  const bg     = resumeBg    || "var(--surface)";
 
   return (
-    <div id="print-area" className="glass-card" style={{ width: "100%", maxWidth: "210mm", background: "var(--surface)", border: "1px solid rgba(255,255,255,0.05)", padding: "3rem", borderRadius: "8px", minHeight: "297mm" }}>
-      
+    <div
+      id="print-area"
+      className="glass-card"
+      style={{ width: "100%", maxWidth: "210mm", background: bg, border: "1px solid rgba(255,255,255,0.05)", padding: "3rem", borderRadius: "8px", minHeight: "297mm" }}
+    >
       {/* Header */}
-      <div style={{ borderBottom: "2px solid var(--primary)", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
+      <div style={{ borderBottom: `2px solid ${accent}`, paddingBottom: "1.5rem", marginBottom: "2rem" }}>
         <h1 style={{ fontFamily: "var(--font-space-grotesk)", fontSize: "2.5rem", fontWeight: 700, letterSpacing: "-0.02em", color: "var(--on-surface)", marginBottom: "0.25rem" }}>
           {name || "Your Name"}
         </h1>
-        <div style={{ color: "var(--primary)", fontSize: "1.125rem", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+        <div style={{ color: accent, fontSize: "1.125rem", fontWeight: 500, letterSpacing: "0.02em", textTransform: "uppercase" }}>
           {title || "Your Title"}
         </div>
       </div>
@@ -20,31 +25,34 @@ export default function ModernTemplate({ data }: TemplateProps) {
       {/* Summary */}
       {summary && (
         <div style={{ marginBottom: "2.5rem" }}>
-          <p style={{ color: "var(--on-surface-variant)", lineHeight: 1.6, fontSize: "0.95rem" }}>
-            {summary}
-          </p>
+          <p style={{ color: "var(--on-surface-variant)", lineHeight: 1.6, fontSize: "0.95rem" }}>{summary}</p>
         </div>
       )}
 
-      {/* Experience */}
-      <div style={{ marginBottom: "2.5rem" }}>
-        <h2 style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--on-surface)", marginBottom: "1.5rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Professional Experience
-        </h2>
-        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          {experiences && experiences.map(exp => (
-            <div key={exp.id}>
+      {/* Experience — grouped by sectionTitle */}
+      {experiences && (() => {
+        const rendered: React.ReactNode[] = [];
+        let lastTitle = "";
+        experiences.forEach((exp, idx) => {
+          const secTitle = exp.sectionTitle?.trim() || "";
+          if (secTitle !== lastTitle) {
+            lastTitle = secTitle;
+            if (secTitle) rendered.push(
+              <h2 key={`h-${idx}`} style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--on-surface)", marginTop: idx === 0 ? 0 : "2.5rem", marginBottom: "1.5rem", textTransform: "uppercase", letterSpacing: "0.05em", borderLeft: `3px solid ${accent}`, paddingLeft: "0.75rem" }}>
+                {secTitle}
+              </h2>
+            );
+          }
+          rendered.push(
+            <div key={exp.id} style={{ marginBottom: "2rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", margin: 0, minHeight: "24px" }}>
                 <div>
                   <span style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--on-surface)" }}>{exp.role}</span>
                   {exp.role && exp.company && <span style={{ margin: "0 8px", color: "var(--on-surface-variant)" }}>|</span>}
-                  <span style={{ fontWeight: 500, color: "var(--secondary)" }}>{exp.company}</span>
+                  <span style={{ fontWeight: 500, color: accent }}>{exp.company}</span>
                 </div>
-                <div style={{ fontSize: "0.875rem", color: "var(--on-surface-variant)" }}>
-                  {exp.duration}
-                </div>
+                <div style={{ fontSize: "0.875rem", color: "var(--on-surface-variant)" }}>{exp.duration}</div>
               </div>
-              {/* Bullet Points */}
               <ul style={{ listStyleType: "square", paddingLeft: "1.2rem", color: "var(--on-surface-variant)", fontSize: "0.9375rem" }}>
                 {exp.enhancedBullets && exp.enhancedBullets.length > 0 ? (
                   exp.enhancedBullets.map((bullet, i) => (
@@ -55,9 +63,10 @@ export default function ModernTemplate({ data }: TemplateProps) {
                 )}
               </ul>
             </div>
-          ))}
-        </div>
-      </div>
+          );
+        });
+        return <div style={{ marginBottom: "2.5rem" }}>{rendered}</div>;
+      })()}
 
       {/* Skills */}
       {skills && (
@@ -74,7 +83,6 @@ export default function ModernTemplate({ data }: TemplateProps) {
           </div>
         </div>
       )}
-
     </div>
   );
 }

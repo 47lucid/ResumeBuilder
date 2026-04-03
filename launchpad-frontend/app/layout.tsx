@@ -17,15 +17,54 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AuraIn. — Create Your Professional Resume",
+  metadataBase: new URL("https://aurain.me"),
+  title: {
+    default: "AuraIn | Best AI Resume Builder & ATS-Friendly CV Maker",
+    template: "%s | AuraIn Resume Builder",
+  },
   description:
-    "AuraIn. is a resume builder to help you create professional resumes quickly.",
-  keywords: ["resume builder", "professional resume", "cv maker"],
+    "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker. Overcome writer's block using our groq-powered AI enhancer, customize premium interactive templates, and land your dream job faster. Try our free resume builder today.",
+  keywords: [
+    "best AI resume builder",
+    "free resume maker",
+    "ATS-friendly CV creator",
+    "AI resume maker free",
+    "resume templates",
+    "build resume online",
+    "professional resume builder",
+    "AuraIn",
+  ],
   openGraph: {
-    title: "AuraIn. — Create Your Professional Resume",
+    title: "AuraIn | Best AI Resume Builder & ATS-Friendly CV Maker",
     description:
-      "AuraIn. is a resume builder to help you create professional resumes quickly.",
+      "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker. Overcome writer's block using our groq-powered AI enhancer and customize premium interactive templates.",
     type: "website",
+    url: "https://aurain.me",
+    siteName: "AuraIn",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AuraIn Resume Builder Interactive Preview",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AuraIn | Best AI Resume Builder",
+    description: "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
