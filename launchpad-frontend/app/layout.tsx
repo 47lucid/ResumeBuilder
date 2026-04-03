@@ -34,6 +34,16 @@ export const metadata: Metadata = {
     "professional resume builder",
     "AuraIn",
   ],
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/icon-192.png",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "AuraIn | Best AI Resume Builder & ATS-Friendly CV Maker",
     description:
@@ -54,6 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AuraIn | Best AI Resume Builder",
     description: "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -78,6 +89,14 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${inter.variable} h-full`}
     >
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#a1fd60" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="AuraIn" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+      </head>
       <body className="min-h-full flex flex-col" style={{ background: "#0e0e0f" }} suppressHydrationWarning>
         <AuthProvider>
           <CursorGlow />
