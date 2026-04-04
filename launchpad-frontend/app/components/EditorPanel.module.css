@@ -101,10 +101,11 @@
   text-transform: uppercase; letter-spacing: 0.05em;
 }
 .colorPickerWrap {
+  position: relative;
   display: flex; align-items: center; gap: 8px;
   background: var(--surface-container); border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px; padding: 6px 10px; cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s; overflow: hidden;
 }
 .colorPickerWrap:hover { border-color: var(--primary); }
 .colorSwatch {
@@ -116,7 +117,11 @@
   flex: 1;
 }
 .colorInput {
-  opacity: 0; position: absolute; width: 0; height: 0; pointer-events: none;
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+  border: none; padding: 0; margin: 0;
+  touch-action: none;
 }
 .sectionTitleInput {
   width: 100%; padding: 10px 12px; font-size: 0.875rem;

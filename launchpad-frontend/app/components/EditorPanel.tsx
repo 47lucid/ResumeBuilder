@@ -1,20 +1,27 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { Experience } from "./templates/types";
 import { TemplateSelector } from "./templates/TemplateSelector";
 import s from "./EditorPanel.module.css";
 
 /* ── colour picker helper ── */
 function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
   return (
     <div className={s.colorRow}>
       <span className={s.colorLabel}>{label}</span>
-      <div className={s.colorPickerWrap} onClick={() => ref.current?.click()}>
+      <div className={s.colorPickerWrap}>
         <span className={s.colorSwatch} style={{ background: value }} />
         <span className={s.colorHex}>{value.toUpperCase()}</span>
-        <input ref={ref} type="color" value={value} onChange={e => onChange(e.target.value)} className={s.colorInput} />
+        <input
+          type="color"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+          onTouchEnd={e => e.stopPropagation()}
+          className={s.colorInput}
+        />
       </div>
     </div>
   );
