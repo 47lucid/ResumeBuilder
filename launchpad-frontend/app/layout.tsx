@@ -66,6 +66,7 @@ export const metadata: Metadata = {
     description: "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker.",
     images: ["/og-image.png"],
   },
+
   robots: {
     index: true,
     follow: true,
@@ -96,6 +97,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="AuraIn" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta name="msvalidate.01" content="7735D71B7E2301BAB9098DF147103D9C" />
       </head>
       <body className="min-h-full flex flex-col" style={{ background: "#0e0e0f" }} suppressHydrationWarning>
         <AuthProvider>
