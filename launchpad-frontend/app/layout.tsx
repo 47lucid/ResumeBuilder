@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | AuraIn Resume Builder",
   },
   description:
-    "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker. Overcome writer's block using our groq-powered AI enhancer, customize premium interactive templates, and land your dream job faster. Try our free resume builder today.",
+    "Build an ATS-optimized resume in minutes with AuraIn's free AI Resume Maker. Overcome writer's block, use premium templates, and land your dream job faster.",
   keywords: [
     "best AI resume builder",
     "free resume maker",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "AuraIn | Best AI Resume Builder & ATS-Friendly CV Maker",
     description:
-      "Build a professional, ATS-optimized resume in minutes with AuraIn's AI Resume Maker. Overcome writer's block using our groq-powered AI enhancer and customize premium interactive templates.",
+      "Build an ATS-optimized resume in minutes with AuraIn's free AI Resume Maker. Use premium templates and AI-powered enhancements to land your dream job.",
     type: "website",
     url: "https://aurain.me",
     siteName: "AuraIn",
