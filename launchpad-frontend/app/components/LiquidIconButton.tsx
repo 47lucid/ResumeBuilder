@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { IconFolder } from "@tabler/icons-react";
 import styles from "./LiquidArchiveButton.module.css";
 
-interface LiquidArchiveButtonProps {
+interface LiquidIconButtonProps {
   onClick: () => void;
+  icon: React.ReactNode;
 }
 
-export default function LiquidArchiveButton({ onClick }: LiquidArchiveButtonProps) {
+export default function LiquidIconButton({ onClick, icon }: LiquidIconButtonProps) {
   const btnRef = useRef<HTMLButtonElement>(null);
   const introRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -83,7 +83,7 @@ export default function LiquidArchiveButton({ onClick }: LiquidArchiveButtonProp
         </div>
         <div className={styles.glassOverlay}></div>
         <div className={styles.icon}>
-          <IconFolder size={26} stroke={1.5} color="rgba(255,255,255,0.85)" />
+          {icon}
         </div>
       </button>
     </>

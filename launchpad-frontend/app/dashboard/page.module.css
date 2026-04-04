@@ -46,6 +46,167 @@
 }
 @media (min-width: 1024px) { .actionBar { justify-content: flex-end; } }
 
+/* ── PREMIUM GLASS DOCK ── */
+.glassDock {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(18, 18, 20, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 100px;
+  padding: 6px 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+@media (min-width: 1024px) {
+  .glassDock {
+    left: auto;
+    right: 2rem;
+    transform: none;
+  }
+}
+
+.dockIconBtn {
+  background: transparent;
+  color: var(--on-surface-variant);
+  border: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+.dockIconBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.dockDivider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+  margin: 0 4px;
+}
+
+.mobileOnlyDockItem {
+  display: contents; /* preserves flex context of the children */
+}
+@media (min-width: 1024px) {
+  .mobileOnlyDockItem { display: none !important; }
+}
+
+.mobilePreviewActive {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: var(--background);
+  overflow-y: auto;
+  padding-top: 4rem; /* room for close button */
+  display: flex !important;
+  flex-direction: column;
+  align-items: center; /* center the A4 page */
+}
+@media (min-width: 1024px) {
+  .mobilePreviewActive {
+    position: relative;
+    z-index: auto;
+    background: transparent;
+    padding-top: 0;
+    display: block !important;
+  }
+}
+
+/* ── FLOATING TRUE PRINT PREVIEW MODAL ── */
+/* ── FLOATING TRUE PRINT PREVIEW MODAL ── */
+.previewModalOverlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column;
+}
+.previewModalBackdrop {
+  position: absolute; inset: 0; 
+  background: rgba(10, 10, 12, 0.45); 
+  backdrop-filter: blur(24px); 
+  -webkit-backdrop-filter: blur(24px);
+}
+.previewModalContent {
+  position: relative; z-index: 1001; flex: 1; 
+  overflow: auto; /* allow scrolling when zoomed */
+  text-align: center; /* center the block child */
+  padding: 4rem 1rem; /* space for floating buttons */
+}
+.floatingCloseBtn {
+  position: fixed; top: 1.5rem; right: 1.5rem; z-index: 1005;
+  background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+  color: #fff; border: 1px solid rgba(255,255,255,0.2); 
+  font-size: 1.8rem; width: 44px; height: 44px; border-radius: 50%; 
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.floatingZoomControls {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 1005;
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(20, 20, 25, 0.75); backdrop-filter: blur(16px);
+  padding: 6px 16px; border-radius: 100px;
+  border: 1px solid rgba(161,253,96,0.3);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+.zoomBtn {
+  background: transparent; border: none; color: var(--primary);
+  font-size: 1.5rem; font-weight: 300; cursor: pointer;
+  width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+}
+.zoomText {
+  color: #fff; font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 3ch; text-align: center;
+}
+
+/* The magic physical bounding box that acts identical to the PDF generator */
+.previewPhysicalA4 {
+  position: absolute !important; top: 0 !important; left: 0 !important;
+  width: 210mm !important; max-width: 210mm !important; min-height: 297mm !important;
+  padding: 2cm !important; border: none !important; box-shadow: none !important; border-radius: 0 !important;
+  transform-origin: top left !important;
+  zoom: normal !important;
+}
+
+.closePreviewBtn {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 260;
+  background: rgba(30,30,32,0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(161,253,96,0.6);
+  color: var(--primary);
+  border-radius: 100px;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+@media (min-width: 1024px) {
+  .closePreviewBtn { display: none; }
+}
+
 .resumeWrapper { display: flex; justify-content: center; padding: clamp(4rem,10vw,6rem) clamp(1rem,3vw,2rem) clamp(10rem,15vw,15rem); }
 
 /* ── Archive modal ── */

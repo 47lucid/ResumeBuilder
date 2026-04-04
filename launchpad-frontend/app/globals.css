@@ -234,10 +234,18 @@ textarea.input-neon {
   font-size: 0.9rem;
   resize: vertical;
   line-height: 1.6;
-  /* Auto-grow to fit content — no scrollbar needed */
+  /* Auto-grow to fit content where supported */
   field-sizing: content;
-  overflow-y: hidden;
+  /* Allow vertical scrolling on mobile/unsupported browsers */
+  overflow-y: auto;
   min-height: 60px;
+  /* Hide scrollbars but keep functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+textarea.input-neon::-webkit-scrollbar {
+  display: none;
 }
 
 .input-neon:focus {
