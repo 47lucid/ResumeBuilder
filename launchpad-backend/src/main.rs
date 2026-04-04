@@ -16,7 +16,7 @@ mod waitlist;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Load .env
-    dotenv::dotenv().ok();
+    dotenvy::dotenv().ok();
 
     // Init tracing
     tracing_subscriber::registry()
