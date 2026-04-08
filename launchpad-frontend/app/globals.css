@@ -122,6 +122,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -131,6 +132,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Restore heading weights — Tailwind v4 preflight resets these to inherit */
@@ -405,3 +408,39 @@ textarea.input-neon::-webkit-scrollbar {
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* =============================================
+   MOBILE RESPONSIVE — Small Android Phones
+   Samsung Galaxy S8+ (360px), Realme XT (412px)
+   ============================================= */
+
+@media (max-width: 480px) {
+  /* Prevent any element from exceeding viewport */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Sections get tighter padding on narrow screens */
+  section {
+    padding-left: clamp(1rem, 5vw, 1.5rem) !important;
+    padding-right: clamp(1rem, 5vw, 1.5rem) !important;
+  }
+
+  /* Feature cards go full-width on very small screens */
+  .feature-card {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Ensure hero h1 doesn't overflow */
+  h1 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Template showcase cards don't overflow */
+  .glass-card {
+    max-width: 100%;
+  }
+}

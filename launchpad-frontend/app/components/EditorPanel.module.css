@@ -28,11 +28,17 @@
 .expHeader    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .expList      { display: flex; flex-direction: column; gap: 1.5rem; }
 
-.expCard   { background: var(--surface-container); padding: 1rem; border-radius: 12px; border: 1px solid rgba(72,72,73,0.2); overflow: hidden; }
+.expCard   { background: var(--surface-container); padding: 1rem; border-radius: 12px; border: 1px solid rgba(72,72,73,0.2); overflow: hidden; position: relative; }
 .expRow    { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
-.removeBtn { background: transparent; border: none; color: var(--on-surface-variant); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; padding: 0 4px; }
+
+@media (max-width: 480px) {
+  .expRow > input { flex: 1 1 100% !important; }
+}
+
+.removeBtn { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; padding: 4px; opacity: 0.6; transition: opacity 0.2s; }
+.removeBtn:hover { opacity: 1; }
 .rawLabel  { font-size: 0.75rem; color: var(--on-surface-variant); margin-bottom: 4px; display: block; }
-.aiSection { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; }
+.aiSection { margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; padding-bottom: 100px; } /* Space for Floating Nav */
 
 /* ── Right panel ── */
 .actionBar {
@@ -92,6 +98,10 @@
 .colorSection { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem; }
 
 .colorGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+@media (max-width: 420px) {
+  .colorGrid { grid-template-columns: 1fr; }
+}
 
 .colorRow {
   display: flex; flex-direction: column; gap: 4px;

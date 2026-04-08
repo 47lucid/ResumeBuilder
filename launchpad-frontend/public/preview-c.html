@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option C — Particle Resume Assembly</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d0d0e; color: #fff; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(13,13,14,0.85); backdrop-filter: blur(20px);
+  }
+  .logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: #a1fd60; letter-spacing: -0.03em; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: #888; text-decoration: none; font-size: 0.875rem; }
+  .btn-cta { background: #a1fd60; color: #1a3300; font-weight: 700; font-size: 0.875rem; padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; }
+
+  /* FULL hero = canvas fills the whole background */
+  .hero-wrapper {
+    position: relative; min-height: 100vh; display: flex;
+    align-items: center; overflow: hidden;
+  }
+  #particleCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+  }
+  .hero-content {
+    position: relative; z-index: 10;
+    padding: 120px 3rem 4rem;
+    max-width: 560px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(161,253,96,0.1); border: 1px solid rgba(161,253,96,0.2);
+    color: #a1fd60; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+    padding: 5px 12px; border-radius: 100px; margin-bottom: 1.5rem;
+  }
+  .badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.04em;
+    margin-bottom: 1.25rem;
+    text-shadow: 0 0 60px rgba(0,0,0,0.8);
+  }
+  h1 em { color: #a1fd60; font-style: normal; }
+  .sub { color: #aaa; font-size: 1.0625rem; line-height: 1.7; max-width: 400px; margin-bottom: 2.5rem; text-shadow: 0 0 20px rgba(0,0,0,0.9); }
+  .hero-ctas { display: flex; gap: 12px; align-items: center; }
+  .btn-primary-lg { background: #a1fd60; color: #1a3300; font-weight: 700; font-size: 0.9375rem; padding: 14px 28px; border-radius: 10px; border: none; cursor: pointer; transition: box-shadow 0.2s, transform 0.15s; }
+  .btn-primary-lg:hover { box-shadow: 0 0 0 8px rgba(161,253,96,0.2); transform: translateY(-1px); }
+  .btn-ghost { color: #888; font-size: 0.9375rem; text-decoration: none; }
+
+  /* reassemble btn */
+  .reassemble-btn {
+    position: absolute; bottom: 2rem; right: 2rem; z-index: 20;
+    background: rgba(20,20,22,0.8); border: 1px solid rgba(161,253,96,0.2);
+    color: #a1fd60; font-size: 0.8rem; font-weight: 600;
+    padding: 8px 16px; border-radius: 100px; cursor: pointer;
+    backdrop-filter: blur(10px); transition: border-color 0.2s;
+  }
+  .reassemble-btn:hover { border-color: rgba(161,253,96,0.5); }
+
+  /* trust + features below */
+  .trust {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 2.5rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  }
+  .trust-label { font-size: 0.8rem; color: #666; white-space: nowrap; }
+  .trust-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+  .trust-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .trust-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); font-size: 0.8rem; padding: 5px 14px; border-radius: 100px; }
+
+  .features { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 3rem; }
+  .section-badge { display: inline-flex; background: rgba(161,253,96,0.08); border: 1px solid rgba(161,253,96,0.15); color: #a1fd60; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.75rem; }
+  .section-sub { color: #888; font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .bento-card { background: #141415; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.75rem; transition: border-color 0.25s, transform 0.25s; }
+  .bento-card:hover { border-color: rgba(161,253,96,0.2); transform: translateY(-3px); }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-icon { width: 44px; height: 44px; border-radius: 10px; background: #1e1e20; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; }
+  .bento-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .bento-desc { color: #888; font-size: 0.875rem; line-height: 1.6; }
+  footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 3rem; text-align: center; color: #666; font-size: 0.85rem; }
+  .footer-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #a1fd60; font-size: 1rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⬡ AuraIn.</div>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Templates</a>
+    <a href="#" class="btn-cta">Get Started →</a>
+  </div>
+</nav>
+
+<div class="hero-wrapper">
+  <canvas id="particleCanvas"></canvas>
+
+  <div class="hero-content">
+    <div class="badge">POWERED BY AI</div>
+    <h1>Your resume,<br><em>assembled.</em></h1>
+    <p class="sub">Thousands of details aligned perfectly. AI-powered, beautifully designed, ready to impress.</p>
+    <div class="hero-ctas">
+      <button class="btn-primary-lg">Start Building Free →</button>
+      <a href="#" class="btn-ghost">See Templates ↗</a>
+    </div>
+  </div>
+
+  <button class="reassemble-btn" id="reassembleBtn">↺ Replay Animation</button>
+</div>
+
+<div style="max-width:1200px;margin:0 auto;padding:0 3rem">
+  <div class="trust">
+    <span class="trust-label">Trusted by professionals at</span>
+    <div class="trust-divider"></div>
+    <div class="trust-chips">
+      <span class="trust-chip">Google</span>
+      <span class="trust-chip">Microsoft</span>
+      <span class="trust-chip">Stripe</span>
+      <span class="trust-chip">Vercel</span>
+      <span class="trust-chip">Shopify</span>
+    </div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="section-header">
+    <div class="section-badge">FEATURES</div>
+    <h2 class="section-title">Built for modern professionals</h2>
+    <p class="section-sub">Every tool you need to tell your career story — and land the job you actually want.</p>
+  </div>
+  <div class="bento">
+    <div class="bento-card wide">
+      <div class="bento-icon">✦</div>
+      <div class="bento-title">AI-Powered Writing</div>
+      <div class="bento-desc">Craft compelling bullet points with AI that understands industry keywords, impact metrics, and recruiter psychology. One click to go from rough notes to polished prose.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">👁️</div>
+      <div class="bento-title">Live Preview</div>
+      <div class="bento-desc">See every change instantly — exactly as recruiters will.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">↓</div>
+      <div class="bento-title">One-Click PDF</div>
+      <div class="bento-desc">Pixel-perfect, ATS-friendly PDFs. No watermarks.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">☁️</div>
+      <div class="bento-title">Cloud Save</div>
+      <div class="bento-desc">All your resumes, safely stored. Edit from anywhere.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">🔒</div>
+      <div class="bento-title">Magic Link Login</div>
+      <div class="bento-desc">No passwords. Just click the link in your email.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">⬡ AuraIn.</div>
+  <p>© 2025 AuraIn. · Privacy · Terms</p>
+</footer>
+
+<script>
+const canvas = document.getElementById('particleCanvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Document shape target ──
+// We define a simplified A4 doc silhouette as a set of filled rectangles
+// that we'll sample points from
+function buildDocShape(W, H) {
+  const docW = Math.min(W * 0.22, 180);
+  const docH = docW * 1.414; // A4 ratio
+  const docX = W * 0.62; // right side
+  const docY = (H - docH) / 2;
+
+  const targets = [];
+  const density = 5; // px between points
+
+  // Outer rect
+  for (let y = docY; y < docY + docH; y += density) {
+    for (let x = docX; x < docX + docW; x += density) {
+      // Skip some to create line-like resume content
+      const relY = (y - docY) / docH;
+      const relX = (x - docX) / docW;
+      let include = false;
+
+      // Header block
+      if (relY < 0.12 && relX > 0.05 && relX < 0.95) include = true;
+      // Line rows (experience/content)
+      const lineY = [0.2, 0.22, 0.24, 0.28, 0.30, 0.32, 0.36, 0.38, 0.4, 0.44,0.46,0.48, 0.52,0.54, 0.58,0.60,0.62];
+      for (const ly of lineY) {
+        if (Math.abs(relY - ly) < 0.008) {
+          const lineW = ly < 0.25 ? 0.9 : (ly % 0.08 < 0.04 ? 0.8 : 0.6);
+          if (relX > 0.07 && relX < 0.07 + lineW) include = true;
+        }
+      }
+      // Outer border
+      if ((Math.abs(relX) < 0.01 || Math.abs(relX - 1) < 0.01 ||
+           Math.abs(relY) < 0.005 || Math.abs(relY - 1) < 0.005) &&
+           relX >= 0 && relX <= 1 && relY >= 0 && relY <=1) include = true;
+
+      if (include) targets.push({ x, y });
+    }
+  }
+  return targets;
+}
+
+// ── Particles ──
+const PARTICLE_COUNT = 3500;
+let targets = [];
+let particles = [];
+let assembled = false;
+let animPhase = 0; // 0=scattering, 1=assembling, 2=assembled
+
+class Particle {
+  constructor(tx, ty) {
+    this.tx = tx; this.ty = ty;
+    this.reset();
+  }
+  reset() {
+    const W = canvas.width, H = canvas.height;
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 2;
+    this.vy = (Math.random() - 0.5) * 2;
+    this.size = Math.random() * 1.5 + 0.4;
+    this.alpha = Math.random() * 0.6 + 0.1;
+    this.color = Math.random() > 0.7 ? '#a1fd60' : Math.random() > 0.5 ? '#00eefc' : '#ffffff';
+    this.speed = Math.random() * 0.04 + 0.02;
+    this.assembled = false;
+    this.noise = Math.random() * Math.PI * 2;
+    this.noiseSpeed = (Math.random() - 0.5) * 0.02;
+    this.delay = Math.random() * 0.8; // staggered assembly
+  }
+  update(phase, progress) {
+    if (phase === 0) {
+      // drift freely
+      this.noise += this.noiseSpeed;
+      this.x += this.vx + Math.sin(this.noise) * 0.3;
+      this.y += this.vy + Math.cos(this.noise * 1.3) * 0.3;
+      // wrap
+      if (this.x < 0) this.x = canvas.width;
+      if (this.x > canvas.width) this.x = 0;
+      if (this.y < 0) this.y = canvas.height;
+      if (this.y > canvas.height) this.y = 0;
+      this.alpha = 0.15 + Math.sin(this.noise) * 0.1;
+    } else if (phase === 1) {
+      // assemble
+      const myProgress = Math.max(0, (progress - this.delay) / (1 - this.delay));
+      const ease = 1 - Math.pow(1 - myProgress, 3); // cubic ease-out
+      this.x += (this.tx - this.x) * this.speed * (1 + ease * 3);
+      this.y += (this.ty - this.y) * this.speed * (1 + ease * 3);
+      this.alpha = 0.2 + ease * 0.8;
+      if (this.color === '#a1fd60') this.size = 0.8 + ease * 1.4;
+    } else {
+      // assembled — gentle shimmer
+      this.noise += 0.02;
+      this.alpha = 0.6 + Math.sin(this.noise + this.delay * 10) * 0.3;
+    }
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.alpha;
+    ctx.fillStyle = this.color;
+    ctx.shadowColor = this.color;
+    ctx.shadowBlur = this.color === '#a1fd60' ? 6 : 3;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function init() {
+  targets = buildDocShape(canvas.width, canvas.height);
+  particles = [];
+  animPhase = 0;
+  // Ensure we have enough targets, or repeat them
+  while (targets.length < PARTICLE_COUNT) {
+    targets = [...targets, ...targets];
+  }
+  targets = targets.slice(0, PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push(new Particle(targets[i].x, targets[i].y));
+  }
+
+  // Start: drift for 1.5s, then assemble
+  setTimeout(() => {
+    animPhase = 1;
+    let start = null;
+    const assembleDuration = 3500;
+    function assembleStep(ts) {
+      if (!start) start = ts;
+      const progress = Math.min(1, (ts - start) / assembleDuration);
+      if (animPhase === 1) {
+        particles.forEach(p => p.update(1, progress));
+      }
+      if (progress >= 1) { animPhase = 2; return; }
+      requestAnimationFrame(assembleStep);
+    }
+    requestAnimationFrame(assembleStep);
+  }, 1500);
+}
+
+let mx = -1, my = -1;
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  mx = e.clientX - r.left;
+  my = e.clientY - r.top;
+});
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    if (animPhase === 0) p.update(0, 0);
+    else if (animPhase === 2) {
+      p.update(2, 1);
+      // Mouse repulsion
+      if (mx > 0) {
+        const dx = p.x - mx, dy = p.y - my;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < 80) {
+          p.x += (dx / dist) * 2;
+          p.y += (dy / dist) * 2;
+        }
+      }
+    }
+    p.draw();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+init();
+animate();
+
+document.getElementById('reassembleBtn').addEventListener('click', () => {
+  particles.forEach(p => p.reset());
+  animPhase = 0;
+  setTimeout(() => {
+    animPhase = 1;
+    let start = null;
+    function assembleStep(ts) {
+      if (!start) start = ts;
+      const progress = Math.min(1, (ts - start) / 3500);
+      particles.forEach(p => p.update(1, progress));
+      if (progress >= 1) { animPhase = 2; return; }
+      requestAnimationFrame(assembleStep);
+    }
+    requestAnimationFrame(assembleStep);
+  }, 1500);
+});
+</script>
+</body>
+</html>

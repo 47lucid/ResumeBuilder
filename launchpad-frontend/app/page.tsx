@@ -322,26 +322,29 @@ function LoginForm() {
     <div style={{ marginTop: "2rem" }}>
       <div style={{
           position: "relative",
-          display: "inline-flex",
+          display: "flex",
+          width: "100%",
+          maxWidth: "360px",
           background: "rgba(255,255,255,0.03)",
           border: "1px solid rgba(255,255,255,0.1)",
           backdropFilter: "blur(12px)",
           borderRadius: "100px",
           padding: "4px",
           marginBottom: "1.5rem",
-          gap: "4px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.1)"
+          gap: "2px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+          overflow: "hidden",
       }}>
-        {/* Sliding Pill Background inside Glassmorphism container */}
+        {/* Sliding Pill - positions dynamically based on flex layout */}
         <div style={{
             position: "absolute",
             top: "4px",
             bottom: "4px",
-            width: mode === "magic" ? "100px" : mode === "login" ? "130px" : mode === "register" ? "90px" : "0px",
-            left: mode === "magic" ? "4px" : mode === "login" ? "108px" : "242px",
+            left: mode === "magic" ? "4px" : mode === "login" ? "calc(33.33% + 2px)" : "calc(66.66% + 2px)",
+            width: "calc(33.33% - 4px)",
             background: "var(--primary)",
             borderRadius: "100px",
-            transition: "left 0.42s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.25s cubic-bezier(0.25, 1, 0.5, 1)",
+            transition: "left 0.42s cubic-bezier(0.34, 1.2, 0.64, 1)",
             opacity: mode === "forgot" ? 0 : 1,
             zIndex: 0
         }} />
@@ -349,21 +352,21 @@ function LoginForm() {
         <button 
           type="button"
           onClick={() => { setStatus("idle"); setMessage(""); setMode("magic"); }} 
-          style={{ width: "100px", position: "relative", zIndex: 1, background: "transparent", color: mode === "magic" ? "#000" : "var(--on-surface)", padding: "8px 0", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center" }}
+          style={{ flex: 1, position: "relative", zIndex: 1, background: "transparent", color: mode === "magic" ? "#000" : "var(--on-surface)", padding: "8px 4px", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center", whiteSpace: "nowrap" }}
         >
           Magic Link
         </button>
         <button 
           type="button"
           onClick={() => { setStatus("idle"); setMessage(""); setMode("login"); }} 
-          style={{ width: "130px", position: "relative", zIndex: 1, background: "transparent", color: mode === "login" ? "#000" : "var(--on-surface)", padding: "8px 0", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center" }}
+          style={{ flex: 1, position: "relative", zIndex: 1, background: "transparent", color: mode === "login" ? "#000" : "var(--on-surface)", padding: "8px 4px", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center", whiteSpace: "nowrap" }}
         >
-          Password Login
+          Password
         </button>
         <button 
           type="button"
           onClick={() => { setStatus("idle"); setMessage(""); setMode("register"); }} 
-          style={{ width: "90px", position: "relative", zIndex: 1, background: "transparent", color: mode === "register" ? "#000" : "var(--on-surface)", padding: "8px 0", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center" }}
+          style={{ flex: 1, position: "relative", zIndex: 1, background: "transparent", color: mode === "register" ? "#000" : "var(--on-surface)", padding: "8px 4px", borderRadius: "100px", border: "none", cursor: "pointer", fontSize: "0.8rem", fontWeight: 600, transition: "color 0.3s ease", textAlign: "center", whiteSpace: "nowrap" }}
         >
           Register
         </button>
@@ -919,7 +922,7 @@ export default function LandingPage() {
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
-          padding: "7rem 2rem 5rem",
+          padding: "7rem clamp(1rem, 5vw, 2rem) 5rem",
           position: "relative",
           overflow: "hidden",
         }}
@@ -949,7 +952,7 @@ export default function LandingPage() {
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "4rem",
+            gap: "clamp(2rem, 6vw, 4rem)",
             zIndex: 1,
           }}
         >
@@ -957,8 +960,8 @@ export default function LandingPage() {
           <div
             className="animate-fade-up"
             style={{
-              flex: "1 1 500px",
-              maxWidth: "600px",
+              flex: "1 1 clamp(280px, 50%, 600px)",
+              minWidth: 0,
             }}
           >
             <h1

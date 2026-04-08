@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option B — Hexagonal Crystal Prism</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0d0e; color: #fff;
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh; overflow-x: hidden;
+  }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(13,13,14,0.8); backdrop-filter: blur(20px);
+  }
+  .logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: #a1fd60; letter-spacing: -0.03em; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: #888; text-decoration: none; font-size: 0.875rem; }
+  .btn-cta { background: #a1fd60; color: #1a3300; font-weight: 700; font-size: 0.875rem; padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer; text-decoration: none; }
+
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 80px 3rem 0; gap: 6rem;
+    max-width: 1200px; margin: 0 auto;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 50%; right: 10%; transform: translateY(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(161,253,96,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-text { flex: 1; z-index: 1; max-width: 480px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(161,253,96,0.1); border: 1px solid rgba(161,253,96,0.2);
+    color: #a1fd60; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+    padding: 5px 12px; border-radius: 100px; margin-bottom: 1.5rem;
+  }
+  .badge::before { content: '⬡'; }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 700; line-height: 1.05; letter-spacing: -0.04em;
+    margin-bottom: 1.25rem;
+  }
+  h1 em { color: #a1fd60; font-style: normal; }
+  .sub { color: #888; font-size: 1.0625rem; line-height: 1.7; max-width: 400px; margin-bottom: 2.5rem; }
+  .hero-ctas { display: flex; gap: 12px; align-items: center; }
+  .btn-primary-lg { background: #a1fd60; color: #1a3300; font-weight: 700; font-size: 0.9375rem; padding: 14px 28px; border-radius: 10px; border: none; cursor: pointer; }
+  .btn-ghost { color: #888; font-size: 0.9375rem; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+
+  /* ─── CANVAS ─── */
+  .canvas-wrap {
+    flex: 0 0 auto; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  canvas { display: block; }
+
+  /* Optional floor reflection gradient */
+  .floor-reflect {
+    position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 80px;
+    background: radial-gradient(ellipse at center, rgba(161,253,96,0.12) 0%, transparent 70%);
+    filter: blur(12px); pointer-events: none;
+  }
+
+  /* trust bar */
+  .trust {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 2rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  }
+  .trust-label { font-size: 0.8rem; color: #666; white-space: nowrap; }
+  .trust-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+  .trust-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .trust-chip { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); font-size: 0.8rem; padding: 5px 14px; border-radius: 100px; }
+
+  /* features */
+  .features { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .section-header { text-align: center; margin-bottom: 3rem; }
+  .section-badge { display: inline-flex; background: rgba(161,253,96,0.08); border: 1px solid rgba(161,253,96,0.15); color: #a1fd60; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.75rem; }
+  .section-sub { color: #888; font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+  .bento { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .bento-card { background: #141415; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.75rem; transition: border-color 0.25s, transform 0.25s; }
+  .bento-card:hover { border-color: rgba(161,253,96,0.2); transform: translateY(-3px); }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-icon { width: 44px; height: 44px; border-radius: 10px; background: #1e1e20; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1rem; }
+  .bento-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .bento-desc { color: #888; font-size: 0.875rem; line-height: 1.6; }
+  footer { border-top: 1px solid rgba(255,255,255,0.05); padding: 3rem; text-align: center; color: #666; font-size: 0.85rem; }
+  .footer-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #a1fd60; font-size: 1rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⬡ AuraIn.</div>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Templates</a>
+    <a href="#" class="btn-cta">Get Started →</a>
+  </div>
+</nav>
+
+<section style="padding-top: 60px;">
+  <div class="hero">
+    <div class="hero-text">
+      <div class="badge">YOUR LOGO, IN 3D</div>
+      <h1>Craft your<br><em>career crystal.</em></h1>
+      <p class="sub">
+        A resume builder built with the obsession of a craftsperson. Powerful AI, beautiful templates, zero friction.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn-primary-lg">Start Building Free →</button>
+        <a href="#" class="btn-ghost">See Templates ↗</a>
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="prismCanvas" width="380" height="460"></canvas>
+      <div class="floor-reflect"></div>
+    </div>
+  </div>
+</section>
+
+<div style="max-width:1200px;margin:0 auto;padding:0 3rem">
+  <div class="trust">
+    <span class="trust-label">Trusted by professionals at</span>
+    <div class="trust-divider"></div>
+    <div class="trust-chips">
+      <span class="trust-chip">Google</span>
+      <span class="trust-chip">Microsoft</span>
+      <span class="trust-chip">Stripe</span>
+      <span class="trust-chip">Vercel</span>
+      <span class="trust-chip">Shopify</span>
+    </div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="section-header">
+    <div class="section-badge">FEATURES</div>
+    <h2 class="section-title">Built for modern professionals</h2>
+    <p class="section-sub">Every tool you need to tell your career story — and land the job you actually want.</p>
+  </div>
+  <div class="bento">
+    <div class="bento-card wide">
+      <div class="bento-icon">✦</div>
+      <div class="bento-title">AI-Powered Writing</div>
+      <div class="bento-desc">Craft compelling bullet points with AI that understands industry keywords, impact metrics, and recruiter psychology. One click to go from rough notes to polished prose.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">👁️</div>
+      <div class="bento-title">Live Preview</div>
+      <div class="bento-desc">See every change instantly — exactly as recruiters will.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">↓</div>
+      <div class="bento-title">One-Click PDF</div>
+      <div class="bento-desc">Pixel-perfect, ATS-friendly PDFs. No watermarks.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">☁️</div>
+      <div class="bento-title">Cloud Save</div>
+      <div class="bento-desc">All your resumes, safely stored. Edit from anywhere.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">🔒</div>
+      <div class="bento-title">Magic Link Login</div>
+      <div class="bento-desc">No passwords. Just click the link in your email.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">⬡ AuraIn.</div>
+  <p>© 2025 AuraIn. · Privacy · Terms</p>
+</footer>
+
+<script>
+// ── CANVAS 2D Hexagonal Prism ──
+const canvas = document.getElementById('prismCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const cx = W / 2, cy = H / 2 - 20;
+
+// Hex dimensions
+const R = 90;  // outer radius of hex
+const HEIGHT = 260; // prism height
+let angle = 0;
+let mouseX = 0, mouseY = 0;
+let targetAngle = 0;
+
+// 6 vertices of a regular hexagon at angle
+function hexPoints(r, ang) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = ang + (Math.PI / 3) * i;
+    pts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r * 0.45 }); // flatten y for perspective
+  }
+  return pts;
+}
+
+// Colors for each face
+const faceColors = [
+  { from: 'rgba(161,253,96,0.18)', to: 'rgba(161,253,96,0.04)' },
+  { from: 'rgba(0,238,252,0.15)', to: 'rgba(0,238,252,0.03)' },
+  { from: 'rgba(255,109,207,0.12)', to: 'rgba(255,109,207,0.02)' },
+  { from: 'rgba(161,253,96,0.10)', to: 'rgba(161,253,96,0.02)' },
+  { from: 'rgba(0,238,252,0.08)', to: 'rgba(0,238,252,0.02)' },
+  { from: 'rgba(255,255,255,0.06)', to: 'rgba(255,255,255,0.01)' },
+];
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  const pts = hexPoints(R, angle);
+  const top = pts.map(p => ({ x: cx + p.x, y: cy - HEIGHT / 2 + p.y }));
+  const bot = pts.map(p => ({ x: cx + p.x, y: cy + HEIGHT / 2 + p.y }));
+
+  // Draw vertical faces (back to front via simple painter's algorithm)
+  // Determine which faces are "visible" based on normal dot product
+  const faceOrder = [];
+  for (let i = 0; i < 6; i++) {
+    const ni = (i + 1) % 6;
+    const midX = (pts[i].x + pts[ni].x) / 2;
+    faceOrder.push({ i, midX });
+  }
+  faceOrder.sort((a, b) => b.midX - a.midX); // back faces first
+
+  faceOrder.forEach(({ i }) => {
+    const ni = (i + 1) % 6;
+    const midX = (pts[i].x + pts[ni].x) / 2;
+    const isFront = midX > 0;
+
+    ctx.beginPath();
+    ctx.moveTo(top[i].x, top[i].y);
+    ctx.lineTo(top[ni].x, top[ni].y);
+    ctx.lineTo(bot[ni].x, bot[ni].y);
+    ctx.lineTo(bot[i].x, bot[i].y);
+    ctx.closePath();
+
+    const fc = faceColors[i];
+    const grad = ctx.createLinearGradient(
+      (top[i].x + top[ni].x) / 2, top[i].y,
+      (bot[i].x + bot[ni].x) / 2, bot[i].y
+    );
+    grad.addColorStop(0, fc.from);
+    grad.addColorStop(1, fc.to);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    if (isFront) {
+      ctx.strokeStyle = i === 0 ? 'rgba(161,253,96,0.6)' : 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = i === 0 ? 1.5 : 0.7;
+      ctx.stroke();
+
+      // Edge glow on primary face
+      if (i === 0) {
+        ctx.strokeStyle = 'rgba(161,253,96,0.3)';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#a1fd60';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+      }
+    } else {
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  });
+
+  // Top cap
+  ctx.beginPath();
+  top.forEach((p, j) => j === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  const topGrad = ctx.createRadialGradient(cx, cy - HEIGHT / 2, 0, cx, cy - HEIGHT / 2, R);
+  topGrad.addColorStop(0, 'rgba(200,255,150,0.25)');
+  topGrad.addColorStop(1, 'rgba(161,253,96,0.05)');
+  ctx.fillStyle = topGrad;
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(161,253,96,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#a1fd60';
+  ctx.shadowBlur = 16;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Bottom edge glow (floor reflection)
+  ctx.beginPath();
+  bot.forEach((p, j) => j === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(161,253,96,0.15)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Vertical edge highlights
+  for (let i = 0; i < 6; i++) {
+    const midX = pts[i].x;
+    const brightness = Math.max(0, midX / R);
+    if (brightness > 0.3) {
+      ctx.beginPath();
+      ctx.moveTo(top[i].x, top[i].y);
+      ctx.lineTo(bot[i].x, bot[i].y);
+      ctx.strokeStyle = `rgba(161,253,96,${brightness * 0.6})`;
+      ctx.lineWidth = 1;
+      ctx.shadowColor = '#a1fd60';
+      ctx.shadowBlur = brightness * 10;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+  }
+}
+
+let autoSpeed = 0.004;
+function animate() {
+  angle += autoSpeed;
+  draw();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Mouse parallax
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) / rect.width - 0.5;
+  autoSpeed = 0.004 + mx * 0.008;
+});
+canvas.addEventListener('mouseleave', () => { autoSpeed = 0.004; });
+</script>
+</body>
+</html>

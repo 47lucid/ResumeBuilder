@@ -3,12 +3,16 @@
 
 .left {
   width: 100%; background: var(--surface-container-low);
-  padding: 2rem; z-index: 10; position: relative;
+  padding: 1.5rem; z-index: 10; position: relative;
   overflow-y: auto; border-bottom: 1px solid rgba(72,72,73,0.2);
   box-sizing: border-box;
 }
 
 .right { flex: 1; min-height: 70vh; overflow-y: auto; position: relative; }
+
+@media (max-width: 480px) {
+  .left { padding: 1rem; }
+}
 
 @media (min-width: 768px) {
   .outer  { flex-direction: row; }

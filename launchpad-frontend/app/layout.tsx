@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import CursorGlow from "./components/CursorGlow";
@@ -80,6 +80,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#0e0e0f",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -99,7 +107,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="msvalidate.01" content="7735D71B7E2301BAB9098DF147103D9C" />
       </head>
-      <body className="min-h-full flex flex-col" style={{ background: "#0e0e0f" }} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col" style={{ background: "#0e0e0f", overflowX: "hidden" }} suppressHydrationWarning>
         <AuthProvider>
           <CursorGlow />
           {children}

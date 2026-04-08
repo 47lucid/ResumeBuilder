@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A — 3D Resume Cube</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #a1fd60;
+    --bg: #0d0d0e;
+    --surface: #141415;
+    --surface-high: #1e1e20;
+    --text: #ffffff;
+    --muted: #888;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 60px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    background: rgba(13,13,14,0.8); backdrop-filter: blur(20px);
+  }
+  .logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; color: var(--primary); letter-spacing: -0.03em; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .btn-cta {
+    background: var(--primary); color: #1a3300; font-weight: 700; font-size: 0.875rem;
+    padding: 9px 20px; border-radius: 8px; border: none; cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s; text-decoration: none;
+  }
+  .btn-cta:hover { box-shadow: 0 0 0 6px rgba(161,253,96,0.2); transform: translateY(-1px); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh; display: flex; align-items: center;
+    padding: 80px 3rem 0;
+    gap: 4rem;
+    max-width: 1200px; margin: 0 auto;
+    position: relative;
+  }
+
+  /* Glow orb */
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 30%; transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(161,253,96,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-text { flex: 1; z-index: 1; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(161,253,96,0.1); border: 1px solid rgba(161,253,96,0.2);
+    color: var(--primary); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em;
+    padding: 5px 12px; border-radius: 100px; margin-bottom: 1.5rem;
+  }
+  .badge::before { content: '●'; font-size: 0.5rem; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.5rem);
+    font-weight: 700; line-height: 1.05;
+    letter-spacing: -0.04em; color: var(--text);
+    margin-bottom: 1.25rem;
+  }
+  h1 em { color: var(--primary); font-style: normal; }
+  .sub {
+    color: var(--muted); font-size: 1.0625rem;
+    line-height: 1.7; max-width: 420px; margin-bottom: 2.5rem;
+  }
+  .hero-ctas { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn-primary-lg {
+    background: var(--primary); color: #1a3300; font-weight: 700; font-size: 0.9375rem;
+    padding: 14px 28px; border-radius: 10px; border: none; cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+  .btn-primary-lg:hover { box-shadow: 0 0 0 8px rgba(161,253,96,0.2); transform: translateY(-1px); }
+  .btn-ghost {
+    color: var(--muted); font-size: 0.9375rem; text-decoration: none;
+    transition: color 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-ghost:hover { color: var(--text); }
+
+  /* ─── CUBE ─── */
+  .cube-scene {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    perspective: 900px; height: 420px; cursor: grab;
+    position: relative; z-index: 1;
+  }
+  .cube-scene:active { cursor: grabbing; }
+
+  .cube-glow {
+    position: absolute;
+    width: 320px; height: 320px;
+    background: radial-gradient(ellipse, rgba(161,253,96,0.18) 0%, transparent 65%);
+    filter: blur(40px);
+    pointer-events: none;
+  }
+
+  .cube-wrap {
+    transform-style: preserve-3d;
+    width: 220px; height: 220px;
+    animation: autorotate 12s linear infinite;
+    transition: animation-play-state 0.3s;
+    position: relative;
+  }
+  .cube-wrap.paused { animation-play-state: paused; }
+  @keyframes autorotate {
+    0%   { transform: rotateX(-20deg) rotateY(0deg); }
+    100% { transform: rotateX(-20deg) rotateY(360deg); }
+  }
+
+  .face {
+    position: absolute;
+    width: 220px; height: 220px;
+    background: rgba(20, 20, 22, 0.92);
+    border: 1px solid rgba(161,253,96,0.25);
+    backface-visibility: hidden;
+    display: flex; flex-direction: column;
+    padding: 16px;
+    box-shadow: inset 0 0 40px rgba(161,253,96,0.03);
+    overflow: hidden;
+  }
+  /* Each face */
+  .front  { transform: translateZ(110px); }
+  .back   { transform: rotateY(180deg) translateZ(110px); }
+  .right  { transform: rotateY(90deg) translateZ(110px); }
+  .left   { transform: rotateY(-90deg) translateZ(110px); }
+  .top    { transform: rotateX(90deg) translateZ(110px); }
+  .bottom { transform: rotateX(-90deg) translateZ(110px); }
+
+  .face-label {
+    font-size: 0.6rem; font-weight: 700; color: var(--primary);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px;
+  }
+  .face-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 4px;
+  }
+  .face-role { font-size: 0.7rem; color: var(--primary); margin-bottom: 10px; }
+  .face-line {
+    height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.08); margin-bottom: 5px;
+  }
+  .face-line.accent { background: rgba(161,253,96,0.4); }
+  .face-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .face-chip {
+    background: rgba(0,238,252,0.1); border: 1px solid rgba(0,238,252,0.2);
+    color: #00eefc; font-size: 0.58rem; font-weight: 600;
+    padding: 2px 7px; border-radius: 100px;
+  }
+  .face-section {
+    font-size: 0.55rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin: 6px 0 4px;
+  }
+  .face-exp-row { display: flex; justify-content: space-between; font-size: 0.62rem; margin-bottom: 3px; }
+  .face-exp-co { color: var(--text); font-weight: 600; }
+  .face-exp-yr { color: var(--muted); }
+  .face-bar { height: 2px; background: rgba(255,255,255,0.06); border-radius: 1px; margin-bottom: 3px; }
+  .face-bar-fill { height: 2px; background: var(--primary); border-radius: 1px; }
+
+  /* Edge glow highlight */
+  .cube-edges {
+    position: absolute; inset: 0;
+    width: 220px; height: 220px;
+    transform-style: preserve-3d;
+    pointer-events: none;
+  }
+
+  /* ─── TRUST BAR ─── */
+  .trust {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 2.5rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+  }
+  .trust-label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .trust-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+  .trust-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .trust-chip {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.55); font-size: 0.8rem;
+    padding: 5px 14px; border-radius: 100px;
+  }
+
+  /* ─── FEATURES BENTO ─── */
+  .features {
+    padding: 5rem 3rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .section-header { text-align: center; margin-bottom: 3rem; }
+  .section-badge {
+    display: inline-flex; align-items: center;
+    background: rgba(161,253,96,0.08); border: 1px solid rgba(161,253,96,0.15);
+    color: var(--primary); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 700;
+    letter-spacing: -0.03em; margin-bottom: 0.75rem;
+  }
+  .section-sub { color: var(--muted); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 16px;
+  }
+  .bento-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 1.75rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .bento-card:hover { border-color: rgba(161,253,96,0.2); transform: translateY(-3px); }
+  .bento-card.wide { grid-column: span 2; }
+  .bento-card.tall { grid-row: span 2; }
+
+  .bento-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--surface-high); display: flex; align-items: center;
+    justify-content: center; font-size: 1.3rem; margin-bottom: 1rem;
+  }
+  .bento-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .bento-desc { color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
+
+  /* Subtle glow top-edge on wide card */
+  .bento-card.wide::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(161,253,96,0.4), transparent);
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 3rem; text-align: center;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  .footer-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--primary); font-size: 1rem; margin-bottom: 0.5rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">⬡ AuraIn.</div>
+  <div class="nav-links">
+    <a href="#">Features</a>
+    <a href="#">Templates</a>
+    <a href="#" class="btn-cta">Get Started →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="padding-top: 60px;">
+  <div class="hero">
+    <!-- Left: Text -->
+    <div class="hero-text">
+      <div class="badge">NOW IN BETA</div>
+      <h1>Your career,<br>from <em>every angle.</em></h1>
+      <p class="sub">
+        Build a resume that gets noticed. AI-powered editing, beautiful templates, and pixel-perfect PDF export — in one place.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn-primary-lg">Start Building Free →</button>
+        <a href="#" class="btn-ghost">Explore Templates ↗</a>
+      </div>
+    </div>
+
+    <!-- Right: 3D Cube -->
+    <div class="cube-scene" id="cubeScene">
+      <div class="cube-glow"></div>
+      <div class="cube-wrap" id="cube">
+        <!-- Front: Modern Template -->
+        <div class="face front">
+          <div class="face-label">Modern ✦</div>
+          <div class="face-name">Aarav Sharma</div>
+          <div class="face-role">Senior Full Stack Engineer</div>
+          <div class="face-line accent" style="width: 60%"></div>
+          <div class="face-line" style="width: 90%"></div>
+          <div class="face-section">Experience</div>
+          <div class="face-exp-row"><span class="face-exp-co">TechCorp Inc.</span><span class="face-exp-yr">2022–Now</span></div>
+          <div class="face-bar"><div class="face-bar-fill" style="width:85%"></div></div>
+          <div class="face-exp-row"><span class="face-exp-co">StartupXYZ</span><span class="face-exp-yr">2020–22</span></div>
+          <div class="face-bar"><div class="face-bar-fill" style="width:65%"></div></div>
+          <div class="face-chips">
+            <span class="face-chip">React</span>
+            <span class="face-chip">Rust</span>
+            <span class="face-chip">TypeScript</span>
+          </div>
+        </div>
+
+        <!-- Back: Minimal Template -->
+        <div class="face back">
+          <div class="face-label">Minimal ◆</div>
+          <div class="face-name">Priya Nair</div>
+          <div class="face-role">Product Manager · FAANG</div>
+          <div class="face-line" style="width:100%;margin:6px 0"></div>
+          <div class="face-section">Impact</div>
+          <div class="face-line" style="width:90%;margin-bottom:4px"></div>
+          <div class="face-line" style="width:70%;margin-bottom:4px"></div>
+          <div class="face-line" style="width:80%;margin-bottom:4px"></div>
+          <div class="face-section">Education</div>
+          <div class="face-exp-row"><span class="face-exp-co">IIT Bombay</span><span class="face-exp-yr">2017</span></div>
+          <div class="face-line accent" style="width:45%"></div>
+        </div>
+
+        <!-- Right: Creative Template -->
+        <div class="face right" style="background: rgba(10,10,12,0.97); border-color: rgba(255,109,207,0.2);">
+          <div class="face-label" style="color:#ff6dcf">Creative ✿</div>
+          <div class="face-name">Sena Kaya</div>
+          <div class="face-role" style="color:#ff6dcf">UI/UX Designer</div>
+          <div style="display:flex;gap:3px;margin:8px 0">
+            <div style="width:8px;height:8px;border-radius:50%;background:#ff6dcf"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,109,207,0.3)"></div>
+            <div style="width:8px;height:8px;border-radius:50%;background:rgba(255,109,207,0.15)"></div>
+          </div>
+          <div class="face-line" style="width:100%;background:rgba(255,109,207,0.15);margin-bottom:6px"></div>
+          <div class="face-line" style="width:80%;background:rgba(255,109,207,0.1);margin-bottom:4px"></div>
+          <div class="face-line" style="width:90%;background:rgba(255,109,207,0.1)"></div>
+          <div class="face-chips">
+            <span class="face-chip" style="background:rgba(255,109,207,0.1);border-color:rgba(255,109,207,0.2);color:#ff6dcf">Figma</span>
+            <span class="face-chip" style="background:rgba(255,109,207,0.1);border-color:rgba(255,109,207,0.2);color:#ff6dcf">Framer</span>
+          </div>
+        </div>
+
+        <!-- Left: Stats face -->
+        <div class="face left">
+          <div class="face-label">AI Score</div>
+          <div style="font-size:2rem;font-weight:700;color:var(--primary);margin:6px 0">94%</div>
+          <div style="font-size:0.65rem;color:var(--muted);margin-bottom:10px">ATS Compatibility</div>
+          <div class="face-bar"><div class="face-bar-fill" style="width:94%"></div></div>
+          <div style="margin-top:10px">
+            <div class="face-section">Keyword Match</div>
+            <div style="font-size:1.5rem;font-weight:700;color:#00eefc">87%</div>
+            <div class="face-bar"><div class="face-bar-fill" style="width:87%;background:#00eefc"></div></div>
+          </div>
+        </div>
+
+        <!-- Top: Export face -->
+        <div class="face top">
+          <div class="face-label">Export</div>
+          <div class="face-name" style="font-size:0.75rem">PDF Ready</div>
+          <div style="font-size:2.5rem;text-align:center;margin:10px 0">↓</div>
+          <div style="font-size:0.65rem;color:var(--muted);text-align:center">Pixel-perfect A4</div>
+        </div>
+
+        <!-- Bottom: Magic face -->
+        <div class="face bottom">
+          <div class="face-label">Magic Link</div>
+          <div style="font-size:1.5rem;text-align:center;margin:10px 0">🔒</div>
+          <div style="font-size:0.65rem;color:var(--muted);text-align:center">Passwordless<br>Sign In</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div style="max-width:1200px;margin:0 auto;padding:0 3rem">
+  <div class="trust">
+    <span class="trust-label">Trusted by professionals at</span>
+    <div class="trust-divider"></div>
+    <div class="trust-chips">
+      <span class="trust-chip">Google</span>
+      <span class="trust-chip">Microsoft</span>
+      <span class="trust-chip">Stripe</span>
+      <span class="trust-chip">Vercel</span>
+      <span class="trust-chip">Shopify</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES BENTO -->
+<section class="features">
+  <div class="section-header">
+    <div class="section-badge">FEATURES</div>
+    <h2 class="section-title">Built for modern professionals</h2>
+    <p class="section-sub">Every tool you need to tell your career story — and land the job you actually want.</p>
+  </div>
+  <div class="bento">
+    <div class="bento-card wide">
+      <div class="bento-icon">✦</div>
+      <div class="bento-title">AI-Powered Writing</div>
+      <div class="bento-desc">Craft compelling bullet points with AI that understands industry keywords, impact metrics, and recruiter psychology. One click to go from rough notes to polished prose.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">👁️</div>
+      <div class="bento-title">Live Preview</div>
+      <div class="bento-desc">See every change instantly — exactly as recruiters will.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">↓</div>
+      <div class="bento-title">One-Click PDF</div>
+      <div class="bento-desc">Pixel-perfect, ATS-friendly PDFs. No watermarks.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">☁️</div>
+      <div class="bento-title">Cloud Save</div>
+      <div class="bento-desc">All your resumes, safely stored. Edit from anywhere.</div>
+    </div>
+    <div class="bento-card">
+      <div class="bento-icon">🔒</div>
+      <div class="bento-title">Magic Link Login</div>
+      <div class="bento-desc">No passwords. Just click the link in your email.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">⬡ AuraIn.</div>
+  <p>© 2025 AuraIn. · Privacy · Terms</p>
+</footer>
+
+<script>
+  const scene = document.getElementById('cubeScene');
+  const cube = document.getElementById('cube');
+  let isDragging = false;
+  let startX = 0, startY = 0;
+  let rotX = -20, rotY = 0;
+  let animRotY = 0;
+  let raf;
+
+  // Auto rotation
+  function autoRotate() {
+    if (!isDragging) {
+      animRotY += 0.3;
+      cube.style.transform = `rotateX(${rotX}deg) rotateY(${animRotY}deg)`;
+    }
+    raf = requestAnimationFrame(autoRotate);
+  }
+  autoRotate();
+
+  scene.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    scene.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    animRotY += dx * 0.5;
+    rotX = Math.max(-45, Math.min(45, rotX - dy * 0.3));
+    startX = e.clientX;
+    startY = e.clientY;
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${animRotY}deg)`;
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    scene.style.cursor = 'grab';
+  });
+
+  // Touch support
+  scene.addEventListener('touchstart', e => {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+  scene.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    animRotY += dx * 0.5;
+    rotX = Math.max(-45, Math.min(45, rotX - dy * 0.3));
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${animRotY}deg)`;
+  }, { passive: false });
+  scene.addEventListener('touchend', () => isDragging = false);
+</script>
+</body>
+</html>
