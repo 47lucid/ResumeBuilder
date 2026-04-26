@@ -2,15 +2,21 @@ import React from "react";
 import { TemplateProps } from "./types";
 
 export default function MinimalTemplate({ data }: TemplateProps) {
-  const { name, title, summary, experiences, skills, accentColor, resumeBg } = data;
+  const { name, title, summary, experiences, skills, accentColor, resumeBg, textColor } = data;
   const accent = accentColor || "var(--primary)";
   const bg     = resumeBg    || "var(--surface)";
+  
+  const rootStyle = {
+    "--on-surface": textColor || "#ffffff",
+    "--on-surface-variant": textColor ? `${textColor}cc` : "#adaaab",
+    width: "100%", maxWidth: "210mm", background: bg, border: "1px solid rgba(255,255,255,0.05)", padding: "4rem", borderRadius: "8px", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "Georgia, serif"
+  } as React.CSSProperties;
 
   return (
     <div
       id="print-area"
       className="glass-card"
-      style={{ width: "100%", maxWidth: "210mm", background: bg, border: "1px solid rgba(255,255,255,0.05)", padding: "4rem", borderRadius: "8px", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "Georgia, serif" }}
+      style={rootStyle}
     >
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${accent}`, paddingBottom: "1rem", marginBottom: "1.5rem", textAlign: "center" }}>

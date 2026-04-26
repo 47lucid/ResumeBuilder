@@ -4,7 +4,7 @@ import { TemplateProps } from "./types";
 export default function CreativeTemplate({ data }: TemplateProps) {
   const {
     name, title, summary, experiences, skills,
-    accentColor, resumeBg, sidebarColor, sidebarTextColor,
+    accentColor, resumeBg, sidebarColor, sidebarTextColor, textColor
   } = data;
 
   const accent      = accentColor      || "var(--primary)";
@@ -12,19 +12,23 @@ export default function CreativeTemplate({ data }: TemplateProps) {
   const sidebar     = sidebarColor     || "var(--surface-container-high)";
   const sidebarText = sidebarTextColor || "var(--on-surface)";
 
+  const rootStyle = {
+    "--on-surface": textColor || "#ffffff",
+    "--on-surface-variant": textColor ? `${textColor}cc` : "#adaaab",
+    width: "100%", maxWidth: "210mm",
+    background: mainBg,
+    display: "flex", minHeight: "297mm",
+    color: "var(--on-surface)",
+    fontFamily: "var(--font-space-grotesk), sans-serif",
+    border: "1px solid rgba(255,255,255,0.05)",
+    borderRadius: "8px", overflow: "hidden",
+  } as React.CSSProperties;
+
   return (
     <div
       id="print-area"
       className="glass-card"
-      style={{
-        width: "100%", maxWidth: "210mm",
-        background: mainBg,
-        display: "flex", minHeight: "297mm",
-        color: "var(--on-surface)",
-        fontFamily: "var(--font-space-grotesk), sans-serif",
-        border: "1px solid rgba(255,255,255,0.05)",
-        borderRadius: "8px", overflow: "hidden",
-      }}
+      style={rootStyle}
     >
       {/* ── Sidebar ── */}
       <div style={{ width: "32%", background: sidebar, color: sidebarText, padding: "3rem 2rem", borderRight: "1px solid rgba(255,255,255,0.05)" }}>

@@ -34,6 +34,7 @@ export default function Dashboard() {
   /* ── Customise ── */
   const [accentColor, setAccentColor] = useState("#a1fd60");
   const [resumeBg, setResumeBg] = useState("#111113");
+  const [textColor, setTextColor] = useState("#ffffff");
   const [sidebarColor, setSidebarColor] = useState("#1e1e22");
   const [sidebarTextColor, setSidebarTextColor] = useState("#f2f2f2");
 
@@ -162,6 +163,7 @@ export default function Dashboard() {
     if (d.templateId) setTemplateId(d.templateId);
     if (d.accentColor) setAccentColor(d.accentColor);
     if (d.resumeBg) setResumeBg(d.resumeBg);
+    if (d.textColor) setTextColor(d.textColor);
     if (d.sidebarColor) setSidebarColor(d.sidebarColor);
     if (d.sidebarTextColor) setSidebarTextColor(d.sidebarTextColor);
   }
@@ -233,7 +235,7 @@ export default function Dashboard() {
     if (allResumes[saveName] && !window.confirm(`"${saveName}" already exists. Overwrite?`)) return;
     setIsSaving(true);
     try {
-      const current = { name, title, summary, skills, experiences, templateId, accentColor, resumeBg, sidebarColor, sidebarTextColor, lastUpdate: new Date().toLocaleTimeString() };
+      const current = { name, title, summary, skills, experiences, templateId, accentColor, resumeBg, textColor, sidebarColor, sidebarTextColor, lastUpdate: new Date().toLocaleTimeString() };
       const newAll = { ...allResumes, [saveName]: current };
       const res = await fetch(getApiUrl("/api/resume"), {
         method: "POST",
@@ -251,7 +253,7 @@ export default function Dashboard() {
     if (active) { applyResumeData(active); setIsArchiveOpen(false); }
   };
 
-  const resumeData = { name, title, summary, skills, experiences, accentColor, resumeBg, sidebarColor, sidebarTextColor };
+  const resumeData = { name, title, summary, skills, experiences, accentColor, resumeBg, textColor, sidebarColor, sidebarTextColor };
 
   return (
     <div className={s.outer}>
@@ -278,6 +280,7 @@ export default function Dashboard() {
         templateId={templateId} setTemplateId={setTemplateId}
         accentColor={accentColor} setAccentColor={setAccentColor}
         resumeBg={resumeBg} setResumeBg={setResumeBg}
+        textColor={textColor} setTextColor={setTextColor}
         sidebarColor={sidebarColor} setSidebarColor={setSidebarColor}
         sidebarTextColor={sidebarTextColor} setSidebarTextColor={setSidebarTextColor}
         onAIButtonClick={enhanceAll}

@@ -21,6 +21,8 @@ export interface ResumeData {
   accentColor?: string;
   /** Resume paper background color */
   resumeBg?: string;
+  /** Main text color (Name, headings, etc) */
+  textColor?: string;
   /** Creative template: sidebar background color */
   sidebarColor?: string;
   /** Creative template: sidebar text / icon color */

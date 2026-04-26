@@ -6,7 +6,7 @@ import { TemplateSelector } from "./templates/TemplateSelector";
 import s from "./EditorPanel.module.css";
 
 /* ── colour picker helper ── */
-function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function ColorPicker({ label, value = "#ffffff", onChange }: { label: string; value?: string; onChange: (v: string) => void }) {
   return (
     <div className={s.colorRow}>
       <span className={s.colorLabel}>{label}</span>
@@ -50,6 +50,7 @@ export interface EditorPanelProps {
   templateId: string; setTemplateId: (v: string) => void;
   accentColor: string; setAccentColor: (v: string) => void;
   resumeBg: string; setResumeBg: (v: string) => void;
+  textColor: string; setTextColor: (v: string) => void;
   sidebarColor: string; setSidebarColor: (v: string) => void;
   sidebarTextColor: string; setSidebarTextColor: (v: string) => void;
   
@@ -67,6 +68,7 @@ export function EditorPanel(props: EditorPanelProps) {
     experiences, updateExp, addExperience, removeExperience,
     templateId, setTemplateId,
     accentColor, setAccentColor, resumeBg, setResumeBg,
+    textColor, setTextColor,
     sidebarColor, setSidebarColor, sidebarTextColor, setSidebarTextColor,
     onAIButtonClick, isEnhancing, aiButtonTextOverride,
     showLogout, onLogout
@@ -158,6 +160,7 @@ export function EditorPanel(props: EditorPanelProps) {
           <div className={s.colorGrid} style={{ marginBottom: "1rem" }}>
             <ColorPicker label="Accent / Highlight" value={accentColor} onChange={setAccentColor} />
             <ColorPicker label="Resume Background"  value={resumeBg}    onChange={setResumeBg}    />
+            <ColorPicker label="Main Text Colour"   value={textColor}   onChange={setTextColor}   />
           </div>
           {templateId === "creative" && (
             <>
