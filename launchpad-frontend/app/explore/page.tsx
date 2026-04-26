@@ -42,6 +42,7 @@ export default function ExploreTemplates() {
   const [resumeBg, setResumeBg] = useState("#111113");
   const [sidebarColor, setSidebarColor] = useState("#1e1e22");
   const [sidebarTextColor, setSidebarTextColor] = useState("#f2f2f2");
+  const [textColor, setTextColor] = useState("#ffffff");
 
   const updateExp = (id: string, field: keyof Experience, value: string) => {
     setExperiences(prev => prev.map(e => {
@@ -65,7 +66,7 @@ export default function ExploreTemplates() {
 
   const resumeData = {
     name, title, summary, skills, experiences,
-    accentColor, resumeBg, sidebarColor, sidebarTextColor
+    accentColor, resumeBg, textColor, sidebarColor, sidebarTextColor
   };
 
   return (
@@ -99,6 +100,7 @@ export default function ExploreTemplates() {
         templateId={templateId} setTemplateId={setTemplateId}
         accentColor={accentColor} setAccentColor={setAccentColor}
         resumeBg={resumeBg} setResumeBg={setResumeBg}
+        textColor={textColor} setTextColor={setTextColor}
         sidebarColor={sidebarColor} setSidebarColor={setSidebarColor}
         sidebarTextColor={sidebarTextColor} setSidebarTextColor={setSidebarTextColor}
         onAIButtonClick={() => setShowLoginModal(true)}
