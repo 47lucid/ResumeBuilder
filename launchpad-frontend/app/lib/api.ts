@@ -6,8 +6,10 @@
  */
 
 export const API_BASE_URL = 
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
+   process.env.NEXT_PUBLIC_API_URL || 
+  (process.env.NODE_ENV === "production" 
+    ? "https://launchpad-backend-latest-qshl.onrender.com" // Backup/old link: "https://launchpad-backend-latest.onrender.com"
+    : "http://localhost:8080");
 /**
  * Helper to build API endpoints safely
  */
