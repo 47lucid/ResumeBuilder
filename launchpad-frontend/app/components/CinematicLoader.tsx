@@ -70,6 +70,8 @@ export default function CinematicLoader() {
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(161,253,96,0.12) 0%, transparent 70%)",
               filter: "blur(60px)",
+              willChange: "transform",
+              transform: "translateZ(0)",
               animation: "orb-drift 6s ease-in-out infinite alternate",
             }}
           />
@@ -83,6 +85,8 @@ export default function CinematicLoader() {
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(0,238,252,0.1) 0%, transparent 70%)",
               filter: "blur(60px)",
+              willChange: "transform",
+              transform: "translateZ(0)",
               animation: "orb-drift 8s ease-in-out infinite alternate-reverse",
             }}
           />

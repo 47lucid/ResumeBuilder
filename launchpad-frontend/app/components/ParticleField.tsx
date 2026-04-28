@@ -57,7 +57,7 @@ export default function ParticleField() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // spawn new particles
-      if (particles.length < 60 && Math.random() < 0.3) spawnParticle();
+      if (particles.length < 40 && Math.random() < 0.2) spawnParticle();
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -76,18 +76,18 @@ export default function ParticleField() {
           continue;
         }
 
+        const alphaStr = p.alpha.toFixed(2);
+
+        // core
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.color}${(p.alpha * 0.65).toFixed(2)})`;
+        ctx.fillStyle = `${p.color}${alphaStr})`;
         ctx.fill();
 
-        // soft glow
+        // simple glow (no expensive radial gradients)
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
-        grad.addColorStop(0, `${p.color}${(p.alpha * 0.12).toFixed(2)})`);
-        grad.addColorStop(1, `${p.color}0)`);
-        ctx.fillStyle = grad;
+        ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.color}${(p.alpha * 0.15).toFixed(2)})`;
         ctx.fill();
       }
 

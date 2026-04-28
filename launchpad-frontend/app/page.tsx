@@ -988,8 +988,10 @@ export default function LandingPage() {
             height: "70%",
             background: "var(--gradient-hero)",
             filter: "blur(100px)",
+            willChange: "transform",
             pointerEvents: "none",
             zIndex: 0,
+            transform: "translateZ(0)",
           }}
         />
         {/* Secondary orb cyan */}
@@ -1004,8 +1006,10 @@ export default function LandingPage() {
             height: "50%",
             background: "radial-gradient(ellipse, rgba(0,238,252,0.06) 0%, transparent 70%)",
             filter: "blur(80px)",
+            willChange: "transform",
             pointerEvents: "none",
             zIndex: 0,
+            transform: "translateZ(0)",
           }}
         />
 
