@@ -12,12 +12,8 @@ import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import {
   FadeUp,
-  FadeIn,
-  ScaleIn,
-  SlideIn,
   StaggerChildren,
   StaggerItem,
-  RevealLine,
 } from "./components/ScrollAnimations";
 
 const ParticleField = dynamic(() => import("./components/ParticleField"), { ssr: false });

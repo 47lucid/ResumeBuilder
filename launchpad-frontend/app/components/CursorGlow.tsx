@@ -32,10 +32,14 @@ export default function CursorGlow() {
   const [isTouch, setIsTouch] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const touch = window.matchMedia("(pointer: coarse)").matches;
-    setIsTouch(touch);
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsTouch(mediaQuery.matches);
 
-    if (touch) {
+    const handleTouchChange = (e: MediaQueryListEvent) => setIsTouch(e.matches);
+    mediaQuery.addEventListener("change", handleTouchChange);
+
+    if (mediaQuery.matches) {
       /* ── Inject ripple keyframes once ── */
       if (!document.getElementById("neon-ripple-style")) {
         const style = document.createElement("style");

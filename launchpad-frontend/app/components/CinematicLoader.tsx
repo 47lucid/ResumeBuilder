@@ -10,6 +10,7 @@ export default function CinematicLoader() {
     // Only show once per session
     const seen = sessionStorage.getItem("aura_loader_seen");
     if (seen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhase("done");
       return;
     }
@@ -25,7 +26,7 @@ export default function CinematicLoader() {
     };
   }, []);
 
-  if (!mounted || phase === "done") return null;
+  if (!mounted) return null;
 
   return (
     <AnimatePresence>

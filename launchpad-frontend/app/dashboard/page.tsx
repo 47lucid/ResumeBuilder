@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { ModernTemplate, MinimalTemplate, CreativeTemplate, TemplateSelector } from "../components/templates";
+import { ModernTemplate, MinimalTemplate, CreativeTemplate } from "../components/templates";
 import { getApiUrl } from "../lib/api";
 
 import { IconEye, IconFolder, IconX } from "@tabler/icons-react";
