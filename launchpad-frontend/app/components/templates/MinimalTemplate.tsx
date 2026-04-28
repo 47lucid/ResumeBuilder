@@ -4,12 +4,12 @@ import { TemplateProps } from "./types";
 export default function MinimalTemplate({ data }: TemplateProps) {
   const { name, title, summary, experiences, skills, accentColor, resumeBg, textColor } = data;
   const accent = accentColor || "var(--primary)";
-  const bg     = resumeBg    || "var(--surface)";
-  
+  const bg = resumeBg || "var(--surface)";
+
   const rootStyle = {
     "--on-surface": textColor || "#ffffff",
     "--on-surface-variant": textColor ? `${textColor}cc` : "#adaaab",
-    width: "100%", maxWidth: "210mm", background: bg, border: "1px solid rgba(255,255,255,0.05)", padding: "4rem", borderRadius: "8px", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "Georgia, serif"
+    width: "100%", maxWidth: "210mm", background: bg, border: `1px solid ${textColor ? `color-mix(in srgb, ${textColor} 15%, transparent)` : "rgba(255,255,255,0.05)"}`, padding: "4rem", borderRadius: "8px", minHeight: "297mm", color: "var(--on-surface)", fontFamily: "Georgia, serif"
   } as React.CSSProperties;
 
   return (

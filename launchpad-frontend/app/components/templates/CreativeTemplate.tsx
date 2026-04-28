@@ -7,9 +7,9 @@ export default function CreativeTemplate({ data }: TemplateProps) {
     accentColor, resumeBg, sidebarColor, sidebarTextColor, textColor
   } = data;
 
-  const accent      = accentColor      || "var(--primary)";
-  const mainBg      = resumeBg         || "var(--surface)";
-  const sidebar     = sidebarColor     || "var(--surface-container-high)";
+  const accent = accentColor || "var(--primary)";
+  const mainBg = resumeBg || "var(--surface)";
+  const sidebar = sidebarColor || "var(--surface-container-high)";
   const sidebarText = sidebarTextColor || "var(--on-surface)";
 
   const rootStyle = {
@@ -20,7 +20,7 @@ export default function CreativeTemplate({ data }: TemplateProps) {
     display: "flex", minHeight: "297mm",
     color: "var(--on-surface)",
     fontFamily: "var(--font-space-grotesk), sans-serif",
-    border: "1px solid rgba(255,255,255,0.05)",
+    border: `1px solid ${textColor ? `color-mix(in srgb, ${textColor} 15%, transparent)` : "rgba(255,255,255,0.05)"}`,
     borderRadius: "8px", overflow: "hidden",
   } as React.CSSProperties;
 
@@ -31,7 +31,7 @@ export default function CreativeTemplate({ data }: TemplateProps) {
       style={rootStyle}
     >
       {/* ── Sidebar ── */}
-      <div style={{ width: "32%", background: sidebar, color: sidebarText, padding: "3rem 2rem", borderRight: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ width: "32%", background: sidebar, color: sidebarText, padding: "3rem 2rem", borderRight: `1px solid ${sidebarTextColor ? `color-mix(in srgb, ${sidebarTextColor} 15%, transparent)` : "rgba(255,255,255,0.05)"}` }}>
         <div style={{ marginBottom: "3rem" }}>
           <h1 style={{ fontSize: "2rem", fontWeight: "900", margin: "0 0 0.5rem 0", lineHeight: 1.1, textTransform: "uppercase", color: sidebarText }}>
             {name || "Your Name"}
