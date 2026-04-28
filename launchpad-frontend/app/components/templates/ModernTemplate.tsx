@@ -82,7 +82,12 @@ export default function ModernTemplate({ data }: TemplateProps) {
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
             {skills.split(",").map((s, i) => s.trim() ? (
-              <span key={i} className="chip" style={{ background: "var(--surface-container-highest)", color: "var(--on-surface)", border: "1px solid rgba(255,255,255,0.1)", fontWeight: 400 }}>
+              <span key={i} className="chip" style={{ 
+                background: textColor ? `color-mix(in srgb, ${textColor} 8%, transparent)` : "rgba(255, 255, 255, 0.08)", 
+                color: "var(--on-surface)", 
+                border: `1px solid ${textColor ? `color-mix(in srgb, ${textColor} 15%, transparent)` : "rgba(255, 255, 255, 0.15)"}`, 
+                fontWeight: 500 
+              }}>
                 {s.trim()}
               </span>
             ) : null)}

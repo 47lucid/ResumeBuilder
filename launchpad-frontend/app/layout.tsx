@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import CursorGlow from "./components/CursorGlow";
+import CinematicLoader from "./components/CinematicLoader";
 import { AuthProvider } from "./context/AuthContext";
 
 const spaceGrotesk = Space_Grotesk({
@@ -109,6 +110,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col" style={{ background: "#0e0e0f", overflowX: "hidden" }} suppressHydrationWarning>
         <AuthProvider>
+          <CinematicLoader />
           <CursorGlow />
           {children}
         </AuthProvider>

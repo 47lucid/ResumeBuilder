@@ -8,6 +8,19 @@ import { useAuth } from "./context/AuthContext";
 import { getApiUrl } from "./lib/api";
 import { FloatingNav } from "./components/FloatingNav";
 import { IconHome, IconFileText, IconStar } from "@tabler/icons-react";
+import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
+import {
+  FadeUp,
+  FadeIn,
+  ScaleIn,
+  SlideIn,
+  StaggerChildren,
+  StaggerItem,
+  RevealLine,
+} from "./components/ScrollAnimations";
+
+const ParticleField = dynamic(() => import("./components/ParticleField"), { ssr: false });
 
 /* ─── Sub-components ─────────────────────────────────────────── */
 
@@ -671,35 +684,39 @@ function FeaturesSection() {
       }}
     >
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-          <span className="badge" style={{ marginBottom: "1rem", display: "inline-block" }}>
-            PREMIUM FEATURES
-          </span>
-          <h2
-            style={{
-              fontFamily: "var(--font-space-grotesk), sans-serif",
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.04em",
-              color: "var(--on-surface)",
-              marginBottom: "0.75rem",
-            }}
-          >
-            Built for modern professionals
-          </h2>
-          <p
-            style={{
-              color: "var(--on-surface-variant)",
-              fontSize: "1rem",
-              maxWidth: "520px",
-              margin: "0 auto",
-            }}
-          >
-            Every tool you need to curate your professional narrative and stand out to top-tier companies.
-          </p>
-        </div>
+        <FadeUp>
+          <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+            <span className="badge" style={{ marginBottom: "1rem", display: "inline-block" }}>
+              PREMIUM FEATURES
+            </span>
+            <h2
+              style={{
+                fontFamily: "var(--font-space-grotesk), sans-serif",
+                fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                color: "var(--on-surface)",
+                marginBottom: "0.75rem",
+              }}
+            >
+              Built for modern professionals
+            </h2>
+            <p
+              style={{
+                color: "var(--on-surface-variant)",
+                fontSize: "1rem",
+                maxWidth: "520px",
+                margin: "0 auto",
+              }}
+            >
+              Every tool you need to curate your professional narrative and stand out to top-tier companies.
+            </p>
+          </div>
+        </FadeUp>
 
-        <div
+        <StaggerChildren
+          stagger={0.1}
+          delayStart={0.05}
           style={{
             display: "flex",
             flexWrap: "wrap",
@@ -708,9 +725,11 @@ function FeaturesSection() {
           }}
         >
           {features.map((f) => (
-            <FeatureCard key={f.id} f={f} />
+            <StaggerItem key={f.id}>
+              <FeatureCard f={f} />
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
       </div>
     </section>
   );
@@ -736,23 +755,37 @@ function TemplateShowcase() {
 
   return (
     <section id="templates" style={{ padding: "6rem 2rem", background: "var(--background)", overflow: "hidden" }}>
-      <div 
+      <div
         onMouseMove={handleMouseMove}
         onMouseLeave={() => setOffset({ x: 0, y: 0 })}
         onTouchMove={handleTouchMove}
         onTouchEnd={() => setOffset({ x: 0, y: 0 })}
         style={{ maxWidth: "1100px", margin: "0 auto", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "4rem", perspective: "1000px", WebkitTapHighlightColor: "transparent" }}
       >
-        
-        {/* Left Side: Cards overlapping */}
-        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", position: "relative", height: "clamp(250px, 70vw, 400px)", transformStyle: "preserve-3d" }}>
-          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(-8deg) translate3d(${offset.x * 20}px, ${offset.y * 20}px, -20px)`, transition: "transform 0.15s ease-out", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "clamp(15%, 25vw, 30%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(4deg) translate3d(${offset.x * -25}px, ${offset.y * -25}px, 0px)`, transition: "transform 0.15s ease-out", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
-          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "clamp(30%, 45vw, 55%)", width: "clamp(130px, 35vw, 240px)", height: "clamp(180px, 50vw, 300px)", transform: `rotate(12deg) translate3d(${offset.x * 40}px, ${offset.y * 40}px, 30px)`, transition: "transform 0.15s ease-out", zIndex: 3, boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }} />
-        </div>
+        {/* Left Side: Cards overlapping — motion.div is the flex child */}
+        <motion.div
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          style={{ flex: "1 1 clamp(280px, 45%, 480px)", position: "relative", height: "clamp(280px, 55vw, 440px)", transformStyle: "preserve-3d", minWidth: "280px" }}
+        >
+          <div className="glass-card" style={{ position: "absolute", top: "10%", left: "5%", width: "clamp(140px, 38vw, 260px)", height: "clamp(190px, 52vw, 320px)", transform: `rotate(-8deg) translate3d(${offset.x * 20}px, ${offset.y * 20}px, -20px)`, transition: "transform 0.15s ease-out", zIndex: 1, boxShadow: "var(--shadow-ambient)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "20%", left: "clamp(18%, 25vw, 32%)", width: "clamp(140px, 38vw, 260px)", height: "clamp(190px, 52vw, 320px)", transform: `rotate(4deg) translate3d(${offset.x * -25}px, ${offset.y * -25}px, 0px)`, transition: "transform 0.15s ease-out", background: "rgba(0,238,252,0.05)", zIndex: 2, boxShadow: "var(--shadow-ambient)", border: "1px solid rgba(0,238,252,0.2)" }} />
+          <div className="glass-card" style={{ position: "absolute", top: "5%", left: "clamp(36%, 48vw, 58%)", width: "clamp(140px, 38vw, 260px)", height: "clamp(190px, 52vw, 320px)", transform: `rotate(12deg) translate3d(${offset.x * 40}px, ${offset.y * 40}px, 30px)`, transition: "transform 0.15s ease-out", zIndex: 3, boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }} />
+        </motion.div>
 
-        {/* Right Side: Copy */}
-        <div style={{ flex: "1 1 clamp(280px, 100%, 400px)", paddingBottom: "clamp(2rem, 15vh, 4rem)" }}>
+        {/* Right Side: Copy — motion.div is the flex child */}
+        <motion.div
+          initial={{ opacity: 0, x: 60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, amount: 0.15 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          style={{ flex: "1 1 clamp(280px, 45%, 480px)", minWidth: "280px", paddingBottom: "clamp(2rem, 8vh, 3rem)" }}
+        >
+          <span className="badge" style={{ marginBottom: "1.25rem", display: "inline-block" }}>
+            PREMIUM TEMPLATES
+          </span>
           <h2
             style={{
               fontFamily: "var(--font-space-grotesk), sans-serif",
@@ -763,15 +796,20 @@ function TemplateShowcase() {
               marginBottom: "1.5rem",
             }}
           >
-            Curated Templates for <span style={{ color: "var(--secondary)" }}>Top Performers.</span>
+            Curated Templates for{" "}
+            <span style={{ color: "var(--secondary)" }}>Top Performers.</span>
           </h2>
-          <p style={{ color: "var(--on-surface-variant)", fontSize: "1.0625rem", marginBottom: "2rem", lineHeight: 1.6 }}>
+          <p style={{ color: "var(--on-surface-variant)", fontSize: "1.0625rem", marginBottom: "2.5rem", lineHeight: 1.7, maxWidth: "420px" }}>
             Avoid generic word documents. Our templates are designed by top recruiters and visual designers to pass through ATS systems while still looking visually stunning.
           </p>
-          <Link href="/explore" className="btn-secondary" style={{ padding: "12px 24px", fontSize: "0.9375rem", textDecoration: "none", display: "inline-block" }}>
-            Explore Templates
+          <Link
+            href="/explore"
+            className="btn-secondary"
+            style={{ padding: "14px 28px", fontSize: "0.9375rem", textDecoration: "none", display: "inline-block", borderRadius: "var(--radius-md)" }}
+          >
+            Explore Templates →
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -792,46 +830,54 @@ function HowItWorks() {
       }}
     >
       <div style={{ maxWidth: "1100px", margin: "0 auto" }}>
-        <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-space-grotesk), sans-serif",
-              fontSize: "clamp(1.5rem, 3vw, 2rem)",
-              fontWeight: 700,
-              letterSpacing: "-0.04em",
-            }}
-          >
-            Start building in seconds
-          </h2>
-        </div>
+        <FadeUp>
+          <div style={{ marginBottom: "2.5rem", textAlign: "center" }}>
+            <h2
+              style={{
+                fontFamily: "var(--font-space-grotesk), sans-serif",
+                fontSize: "clamp(1.5rem, 3vw, 2rem)",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+              }}
+            >
+              Start building in seconds
+            </h2>
+          </div>
+        </FadeUp>
 
         {/* Responsive Flow */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+        <StaggerChildren stagger={0.15} delayStart={0.1} className="flex flex-col md:flex-row items-center justify-center gap-6">
           {steps.map((m, i) => (
-            <div key={m.label} className="flex flex-col md:flex-row items-center gap-6">
-              <div
-                style={{
-                  padding: "16px 24px",
-                  borderRadius: "var(--radius-full)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  background: "var(--surface-container)",
-                  border: "1px solid rgba(72,72,73,0.3)",
-                  color: "var(--on-surface)",
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                }}
-              >
-                <span>{m.icon}</span>
-                <span>{m.label}</span>
+            <StaggerItem key={m.label}>
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <motion.div
+                  whileHover={{ scale: 1.06, y: -3 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  style={{
+                    padding: "16px 24px",
+                    borderRadius: "var(--radius-full)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    background: "var(--surface-container)",
+                    border: "1px solid rgba(72,72,73,0.3)",
+                    color: "var(--on-surface)",
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                    cursor: "default",
+                  }}
+                >
+                  <span>{m.icon}</span>
+                  <span>{m.label}</span>
+                </motion.div>
+                {i < steps.length - 1 && (
+                  <div className="bg-[var(--outline-variant)] opacity-60 w-[2px] h-[30px] md:w-[40px] md:h-[2px]" />
+                )}
               </div>
-              {i < steps.length - 1 && (
-                <div className="bg-[var(--outline-variant)] opacity-60 w-[2px] h-[30px] md:w-[40px] md:h-[2px]" />
-              )}
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerChildren>
       </div>
     </section>
   );
@@ -927,8 +973,13 @@ export default function LandingPage() {
           overflow: "hidden",
         }}
       >
-        {/* Background ambient lighting */}
-        <div
+        {/* Particle field */}
+        <ParticleField />
+
+        {/* Background ambient orb */}
+        <motion.div
+          animate={{ x: [0, 30, -20, 0], y: [0, -20, 15, 0], scale: [1, 1.05, 0.97, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "absolute",
             top: "-10%",
@@ -938,8 +989,23 @@ export default function LandingPage() {
             background: "var(--gradient-hero)",
             filter: "blur(100px)",
             pointerEvents: "none",
-            zIndex: -1,
-            animation: "orb-drift 20s infinite alternate ease-in-out",
+            zIndex: 0,
+          }}
+        />
+        {/* Secondary orb cyan */}
+        <motion.div
+          animate={{ x: [0, -40, 20, 0], y: [0, 30, -20, 0], scale: [1, 0.95, 1.08, 1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            right: "-5%",
+            width: "40%",
+            height: "50%",
+            background: "radial-gradient(ellipse, rgba(0,238,252,0.06) 0%, transparent 70%)",
+            filter: "blur(80px)",
+            pointerEvents: "none",
+            zIndex: 0,
           }}
         />
 
@@ -954,28 +1020,51 @@ export default function LandingPage() {
             flexWrap: "wrap",
             gap: "clamp(2rem, 6vw, 4rem)",
             zIndex: 1,
+            position: "relative",
           }}
         >
-          {/* Left Area */}
-          <div
-            className="animate-fade-up"
-            style={{
-              flex: "1 1 clamp(280px, 50%, 600px)",
-              minWidth: 0,
-            }}
-          >
-            <h1
+          {/* Left Area — direct motion animations, no useInView (hero is always visible on load) */}
+          <div style={{ flex: "1 1 clamp(280px, 50%, 600px)", minWidth: 0 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
+            >
+              <span className="badge" style={{ marginBottom: "1.25rem", display: "inline-block" }}>
+                AI-POWERED RESUME BUILDER
+              </span>
+            </motion.div>
+
+            <motion.h1
               className="font-display"
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 fontSize: "clamp(3rem, 6vw, 5rem)",
                 fontWeight: 700,
                 lineHeight: 1.05,
                 letterSpacing: "-0.04em",
                 color: "var(--on-surface)",
+                marginBottom: "0.15rem",
+              }}
+            >
+              Your Resume.
+            </motion.h1>
+
+            <motion.h1
+              className="font-display"
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                fontSize: "clamp(3rem, 6vw, 5rem)",
+                fontWeight: 700,
+                lineHeight: 1.05,
+                letterSpacing: "-0.04em",
                 marginBottom: "1.5rem",
               }}
             >
-              Your Resume. <br />
               <span
                 style={{
                   background: "var(--gradient-primary)",
@@ -985,24 +1074,41 @@ export default function LandingPage() {
               >
                 Reimagined.
               </span>
-            </h1>
-            <p
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.32, ease: "easeOut" }}
               style={{
                 fontSize: "1.125rem",
                 color: "var(--on-surface-variant)",
                 lineHeight: 1.6,
                 maxWidth: "480px",
+                marginBottom: "0",
               }}
             >
-              Stop treating your career history like a form. Design premium, ATS-ready resumes that open doors to top tech companies. Connect securely and save everything in the cloud.
-            </p>
+              Stop treating your career history like a form. Design premium, ATS-ready resumes that open doors to top tech companies.
+            </motion.p>
 
             {/* Email Magic Link Form Container */}
-            <LoginForm />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.42, ease: "easeOut" }}
+            >
+              <LoginForm />
+            </motion.div>
           </div>
 
           {/* Right Area (3D Glass Card Mock) */}
-          <LiveResumeCard />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+          >
+            <LiveResumeCard />
+          </motion.div>
         </div>
       </section>
 
